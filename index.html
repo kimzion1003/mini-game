@@ -89,8 +89,8 @@
       border-radius: 6px;
     }
 
-    /* ================= 2. 닉네임 입력 화면 ================= */
-    #name-screen {
+    /* ================= 2. 로그인 및 회원가입 화면 ================= */
+    #auth-screen {
       width: 100%;
       min-height: 550px;
       margin: 0 auto;
@@ -103,12 +103,13 @@
       justify-content: center;
       align-items: center;
       padding: 40px 30px;
-      gap: 30px;
+      gap: 20px;
     }
 
-    .name-aa {
+    .auth-title {
       width: 100%;
-      padding: 20px;
+      max-width: 500px;
+      padding: 15px;
       border: 2px solid #fff;
       background: #111;
       font-size: clamp(20px, 3vw, 26px);
@@ -117,17 +118,18 @@
       border-radius: 10px;
     }
 
-    .name-input-group {
+    .auth-box {
       width: 100%;
-      max-width: 600px;
+      max-width: 400px;
       display: flex;
-      gap: 15px;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .name-bb {
-      flex: 1;
-      padding: 15px;
-      font-size: 18px;
+    .auth-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
       font-weight: bold;
       font-family: inherit;
       background: #000;
@@ -138,13 +140,20 @@
       outline: none;
     }
 
-    .name-bb:focus {
+    .auth-input:focus {
       border-color: #00ff88;
       box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
     }
 
-    .name-cc {
-      padding: 0 25px;
+    .auth-btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .auth-btn {
+      flex: 1;
+      padding: 14px;
       font-size: 16px;
       font-weight: bold;
       font-family: inherit;
@@ -155,9 +164,15 @@
       cursor: pointer;
     }
 
-    .name-cc:active {
+    .auth-btn:active {
       background: #fff;
       color: #000;
+    }
+
+    .auth-btn-signup {
+      background: #1a3a5f;
+      border-color: #4facfe;
+      color: #4facfe;
     }
 
     /* ================= 3. 필드 화면 ================= */
@@ -476,18 +491,22 @@
   <div id="game-container">
 
     <!-- ================= 1. 타이틀 화면 ================= -->
-    <div id="title-screen" onclick="goToNameScreen()">
+    <div id="title-screen" onclick="goToAuthScreen()">
       <div class="title-a">턴제형 미니게임</div>
       <div class="title-b">아무곳이나 클릭해 게임을 시작하세요</div>
       <div class="title-c">제작자: 제미나이, 시온</div>
     </div>
 
-    <!-- ================= 2. 닉네임 입력 화면 ================= -->
-    <div id="name-screen">
-      <div class="name-aa">닉네임을 입력해 주세요</div>
-      <div class="name-input-group">
-        <input type="text" id="nickname-input" class="name-bb" value="" placeholder="닉네임 입력" maxlength="8" onclick="event.stopPropagation()">
-        <button class="name-cc" onclick="startGameWithNickname(event)">ENTER</button>
+    <!-- ================= 2. 로그인 및 회원가입 화면 ================= -->
+    <div id="auth-screen">
+      <div class="auth-title">로그인 / 회원가입</div>
+      <div class="auth-box">
+        <input type="text" id="auth-username" class="auth-input" placeholder="아이디 (닉네임)" maxlength="8">
+        <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" maxlength="16">
+        <div class="auth-btn-group">
+          <button class="auth-btn" onclick="handleLogin()">로그인</button>
+          <button class="auth-btn auth-btn-signup" onclick="handleSignUp()">회원가입</button>
+        </div>
       </div>
     </div>
 
@@ -583,7 +602,7 @@
   </div>
 
   <script>
-    // ================= [플레이어 데이터 & 닉네임] =================
+    // ================= [계정 및 세이브 로드 시스템] =================
     let playerName = "";
     let playerLv = 1;
     let playerExp = 0;
@@ -592,41 +611,130 @@
     let heroHp = 100.0;
     let touchDmgMult = 0.20;
 
-    function goToNameScreen() {
-      document.getElementById("title-screen").style.display = "none";
-      document.getElementById("name-screen").style.display = "flex";
-      setTimeout(() => document.getElementById("nickname-input").focus(), 100);
+    // 로컬 스토리지 데이터 가져오기
+    function getUsersData() {
+      const data = localStorage.getItem("game_users");
+      return data ? JSON.parse(data) : {};
     }
 
-    function startGameWithNickname(e) {
-      if (e && e.stopPropagation) e.stopPropagation();
-      
-      const inputVal = document.getElementById("nickname-input").value.trim();
-      
-      if (inputVal === "") {
-        alert("닉네임을 입력해 주세요!");
-        document.getElementById("nickname-input").focus();
+    // 로컬 스토리지 데이터 저장하기
+    function saveUsersData(users) {
+      localStorage.setItem("game_users", JSON.stringify(users));
+    }
+
+    function goToAuthScreen() {
+      document.getElementById("title-screen").style.display = "none";
+      document.getElementById("auth-screen").style.display = "flex";
+      setTimeout(() => document.getElementById("auth-username").focus(), 100);
+    }
+
+    // 회원가입
+    function handleSignUp() {
+      const username = document.getElementById("auth-username").value.trim();
+      const password = document.getElementById("auth-password").value.trim();
+
+      if (!username || !password) {
+        alert("아이디와 비밀번호를 모두 입력해 주세요.");
         return;
       }
+
+      const users = getUsersData();
+
+      // 아이디 중복 확인
+      if (users[username]) {
+        alert("이미 존재하는 아이디(닉네임)입니다.");
+        return;
+      }
+
+      // 신규 계정 생성
+      users[username] = {
+        password: password,
+        saveData: {
+          playerLv: 1,
+          playerExp: 0,
+          playerMaxExp: 100,
+          playerMaxHp: 100,
+          heroHp: 100.0,
+          touchDmgMult: 0.20
+        }
+      };
+
+      saveUsersData(users);
+      alert(`🎉 회원가입 성공! 계정이 생성되었습니다.\n아이디: ${username}`);
       
-      playerName = inputVal;
-      
+      // 즉시 자동 로그인 진행
+      loginSuccess(username, users[username].saveData);
+    }
+
+    // 로그인
+    function handleLogin() {
+      const username = document.getElementById("auth-username").value.trim();
+      const password = document.getElementById("auth-password").value.trim();
+
+      if (!username || !password) {
+        alert("아이디와 비밀번호를 모두 입력해 주세요.");
+        return;
+      }
+
+      const users = getUsersData();
+
+      if (!users[username]) {
+        alert("존재하지 않는 아이디입니다.");
+        return;
+      }
+
+      if (users[username].password !== password) {
+        alert("비밀번호가 일치하지 않습니다.");
+        return;
+      }
+
+      // 로그인 성공 및 데이터 로드
+      alert(`환영합니다, ${username}님! 데이터가 연결되었습니다.`);
+      loginSuccess(username, users[username].saveData);
+    }
+
+    // 로그인 성공 후 필드 진입
+    function loginSuccess(username, saveData) {
+      playerName = username;
+
+      // 자동 로드
+      if (saveData) {
+        playerLv = saveData.playerLv || 1;
+        playerExp = saveData.playerExp || 0;
+        playerMaxExp = saveData.playerMaxExp || 100;
+        playerMaxHp = saveData.playerMaxHp || 100;
+        heroHp = saveData.heroHp || 100.0;
+        touchDmgMult = saveData.touchDmgMult || 0.20;
+      }
+
       document.getElementById("info-name").innerText = playerName;
       document.getElementById("battle-hero-name").innerText = playerName;
 
-      document.getElementById("name-screen").style.display = "none";
+      document.getElementById("auth-screen").style.display = "none";
       document.getElementById("field-screen").style.display = "block";
-      
+
       isFieldMode = true;
       updateInfoUI();
       repositionEnemies();
     }
 
-    document.getElementById("nickname-input").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        startGameWithNickname(e);
+    // 실시간 자동 세이브
+    function autoSave() {
+      if (!playerName) return;
+
+      const users = getUsersData();
+      if (users[playerName]) {
+        users[playerName].saveData = {
+          playerLv: playerLv,
+          playerExp: playerExp,
+          playerMaxExp: playerMaxExp,
+          playerMaxHp: playerMaxHp,
+          heroHp: heroHp,
+          touchDmgMult: touchDmgMult
+        };
+        saveUsersData(users);
       }
-    });
+    }
 
     // ================= [필드 & 이동 시스템] =================
     let playerX = 0;
@@ -676,16 +784,13 @@
         if (k === 's' || k === 'ㄴ') keys.s = true;
         if (k === 'd' || k === 'ㅇ') keys.d = true;
       } else if (document.getElementById("battle-screen").style.display === "block") {
-        // 전투 중일 때 처리
         if (isAttackingMode || isDodgeMode) {
-          // 연타 모드 진행 중이면 아무 키나 누르더라도 연타로 인식!
           registerInput();
           return;
         }
 
         if (isCooltime) return;
 
-        // 턴 선택 메뉴 단축키
         if (e.key === "1") handleAttack(e);
         else if (e.key === "2") handleCounter(e);
         else if (e.key === "3" && !dodgeDisabledTurn) handleDodge(e);
@@ -777,6 +882,7 @@
         alert(`🎉 LEVEL UP! 레벨 ${playerLv} 달성!\n체력 +25 (최대 ${playerMaxHp}) | 터치당 데미지 +0.20 (총 ${touchDmgMult.toFixed(2)})`);
       }
       updateInfoUI();
+      autoSave(); // 레벨업 및 EXP 획득 시 자동 세이브
     }
 
     // ================= [전투 시스템] =================
@@ -831,6 +937,7 @@
         gainExp(currentEnemy.exp);
       }
       updateInfoUI();
+      autoSave(); // 전투 종료 시 자동 저장
     }
 
     function handleRun(e) {
@@ -867,7 +974,6 @@
       }
     }
 
-    // 화면 클릭/터치 시 연타 등록
     window.addEventListener("pointerdown", (e) => {
       if (!isFieldMode && document.getElementById("battle-screen").style.display === "block") {
         registerInput();
