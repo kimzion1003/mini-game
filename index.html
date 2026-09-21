@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>턴제형 미니게임</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      text-align: center;
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 15px 0;
+    }
+
+    #game-container {
+      width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ================= 1. 타이틀 화면 ================= */
+    #title-screen {
+      width: 460px;
+      height: 280px;
+      margin: 10px auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 20px 15px 20px;
+    }
+
+    .title-a {
+      width: 100%;
+      padding: 15px 10px;
+      border: 2px solid #fff;
+      background: #111;
+      font-size: 22px;
+      font-weight: bold;
+      color: #4facfe;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+    }
+
+    .title-b {
+      width: 100%;
+      padding: 10px;
+      border: 2px dashed #777;
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 14px;
+      color: #ffff00;
+      border-radius: 8px;
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .title-c {
+      align-self: flex-end;
+      padding: 5px 12px;
+      border: 1px solid #555;
+      background: #000;
+      font-size: 11px;
+      color: #aaa;
+      border-radius: 5px;
+    }
+
+    /* ================= 2. 닉네임 입력 화면 (세로 길이 축소) ================= */
+    #name-screen {
+      width: 460px;
+      height: 280px; /* 타이틀 화면과 동일하게 280px로 축소 */
+      margin: 10px auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
+      position: relative;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 25px;
+      gap: 20px;
+    }
+
+    .name-aa {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #fff;
+      background: #111;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      border-radius: 8px;
+    }
+
+    .name-input-group {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+    }
+
+    .name-bb {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      font-family: inherit;
+      background: #000;
+      color: #00ff88;
+      border: 2px solid #777;
+      border-radius: 6px;
+      text-align: center;
+      outline: none;
+    }
+
+    .name-bb:focus {
+      border-color: #00ff88;
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    }
+
+    .name-cc {
+      padding: 0 20px;
+      font-size: 15px;
+      font-weight: bold;
+      font-family: inherit;
+      background: #333;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .name-cc:active {
+      background: #fff;
+      color: #000;
+    }
+
+    /* ================= 3. 필드 화면 ================= */
+    #field-screen {
+      width: 460px;
+      height: 520px;
+      margin: 10px auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      display: none;
+    }
+
+    .enemy-node {
+      position: absolute;
+      width: 80px;
+      height: 70px;
+      border: 2px solid #ff4444;
+      background-color: #2a1111;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+    }
+    .enemy-node .icon { font-size: 22px; margin-bottom: 2px; }
+
+    #player-container {
+      position: absolute;
+      width: 80px;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transform: translateX(-20px);
+      transition: left 0.05s linear, top 0.05s linear;
+      pointer-events: none;
+    }
+
+    #player-nametag {
+      font-size: 11px;
+      font-weight: bold;
+      color: #00ff88;
+      text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+      white-space: nowrap;
+      margin-bottom: 3px;
+    }
+
+    #player {
+      width: 40px;
+      height: 40px;
+      background-color: #4facfe;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #4facfe;
+    }
+
+    #field-ui {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      height: 180px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    #dpad {
+      width: 140px;
+      height: 140px;
+      position: relative;
+    }
+    .pad-btn {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      background: #333;
+      color: #fff;
+      border: 2px solid #777;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pad-btn:active { background: #666; }
+    #btn-w { top: 0; left: 49px; }
+    #btn-a { top: 49px; left: 0; }
+    #btn-s { top: 98px; left: 49px; }
+    #btn-d { top: 49px; left: 98px; }
+
+    #info-panel {
+      width: 270px;
+      height: 140px;
+      background: #111;
+      border: 2px solid #555;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: left;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
+    .info-row { display: flex; justify-content: space-between; align-items: center; }
+    .exp-bg {
+      width: 100%;
+      height: 10px;
+      background: #333;
+      border: 1px solid #777;
+      margin-top: 4px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    #exp-fill {
+      height: 100%;
+      width: 0%;
+      background: #00ff88;
+      transition: width 0.3s ease;
+    }
+
+    /* ================= 4. 전투 화면 ================= */
+    #battle-screen {
+      display: none;
+    }
+
+    #game-board {
+      width: 460px;
+      height: 280px;
+      margin: 10px auto;
+      border: 3px solid #fff;
+      background-color: #000;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    #game-board.crit-glow {
+      border-color: #ffea00 !important;
+      box-shadow: 0 0 30px #ffea00, inset 0 0 20px #ffea00 !important;
+      animation: flash-border 0.5s ease-out;
+    }
+    @keyframes flash-border {
+      0% { background-color: #332b00; }
+      100% { background-color: #000; }
+    }
+
+    .shake { animation: shake-anim 0.35s ease-in-out; }
+    @keyframes shake-anim {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-8px, 5px); }
+      40% { transform: translate(8px, -5px); }
+      60% { transform: translate(-5px, 3px); }
+      80% { transform: translate(5px, -3px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .status-bar {
+      position: absolute;
+      top: 15px;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: left;
+    }
+    #hero-status { left: 20px; color: #4facfe; }
+    #blob-status { right: 20px; text-align: right; color: #ff0844; }
+
+    .hp-bg {
+      width: 120px;
+      height: 12px;
+      background: #444;
+      border: 1px solid #fff;
+      margin-top: 4px;
+    }
+    .hp-fill { height: 100%; width: 100%; transition: width 0.3s ease; }
+    #hero-hp-fill { background: #4facfe; }
+    #blob-hp-fill { background: #ff0844; }
+
+    .character { position: absolute; top: 100px; font-size: 60px; }
+    #hero { left: 40px; }
+    #blob { right: 40px; }
+
+    #touch-box {
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 60px;
+      background-color: #1a1a1a;
+      border: 3px solid #555;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.8);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #touch-box .box-title { font-size: 10px; color: #aaa; margin-bottom: 2px; }
+    #touch-box .box-count { font-size: 24px; font-weight: bold; color: #fff; }
+
+    #touch-box.tier-yellow { border-color: #ffea00 !important; box-shadow: 0 0 12px #ffea00; }
+    #touch-box.tier-orange { border-color: #ff8800 !important; box-shadow: 0 0 14px #ff8800; }
+    #touch-box.tier-red { border-color: #ff2222 !important; box-shadow: 0 0 16px #ff2222; }
+    #touch-box.tier-white { border-color: #ffffff !important; box-shadow: 0 0 20px #ffffff; }
+
+    .slash-effect {
+      position: absolute;
+      top: 80px;
+      right: 35px;
+      width: 100px;
+      height: 100px;
+      pointer-events: none;
+      display: none;
+    }
+    .slash-line {
+      position: absolute;
+      width: 140%;
+      height: 6px;
+      background: linear-gradient(90deg, transparent, #fff, #ffea00, #fff, transparent);
+      top: 50%;
+      left: -20%;
+      transform: rotate(-45deg) scaleX(0);
+      box-shadow: 0 0 10px #ffea00, 0 0 20px #fff;
+    }
+    .slash-active .slash-line { animation: slash-anim 0.25s ease-out forwards; }
+    @keyframes slash-anim {
+      0% { transform: rotate(-45deg) scaleX(0); opacity: 1; }
+      50% { transform: rotate(-45deg) scaleX(1.2); opacity: 1; }
+      100% { transform: rotate(-45deg) scaleX(1.5); opacity: 0; }
+    }
+
+    .floating-damage {
+      position: absolute;
+      font-size: 28px;
+      font-weight: 900;
+      color: #ff3333;
+      text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+      pointer-events: none;
+      animation: float-up 0.8s ease-out forwards;
+      z-index: 10;
+    }
+    .floating-damage.crit { color: #ffea00 !important; font-size: 36px !important; }
+    @keyframes float-up {
+      0% { opacity: 0; transform: translateY(0) scale(0.5); }
+      30% { opacity: 1; transform: translateY(-20px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-50px) scale(1); }
+    }
+
+    #msg-box {
+      height: 45px;
+      font-weight: bold;
+      color: #ffff00;
+      margin: 10px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+    }
+
+    #ui-container {
+      width: 460px;
+      margin: 0 auto;
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 0;
+      font-size: 12px;
+      font-weight: bold;
+      font-family: inherit;
+      border: 2px solid #fff;
+      background-color: #000;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:active:not(:disabled) { background-color: #fff; color: #000; }
+    .btn:disabled { border-color: #555; color: #555; cursor: not-allowed; }
+    #btn-run { border-color: #ff8800; color: #ff8800; }
+    #btn-run:active:not(:disabled) { background-color: #ff8800; color: #000; }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <h2>🎮 턴제형 미니게임</h2>
+
+    <!-- ================= 1. 타이틀 화면 ================= -->
+    <div id="title-screen" onclick="goToNameScreen()">
+      <div class="title-a">턴제형 미니게임</div>
+      <div class="title-b">아무곳이나 클릭해 게임을 시작하세요</div>
+      <div class="title-c">제작자: 제미나이, 시온</div>
+    </div>
+
+    <!-- ================= 2. 닉네임 입력 화면 ================= -->
+    <div id="name-screen">
+      <div class="name-aa">닉네임을 입력해 주세요</div>
+      <div class="name-input-group">
+        <input type="text" id="nickname-input" class="name-bb" value="" placeholder="닉네임 입력" maxlength="8" onclick="event.stopPropagation()">
+        <button class="name-cc" onclick="startGameWithNickname(event)">ENTER</button>
+      </div>
+    </div>
+
+    <!-- ================= 3. 필드 화면 ================= -->
+    <div id="field-screen">
+      <div class="enemy-node" style="top: 30px; left: 20px;">
+        <span class="icon">🟢</span>
+        쉬움 (Lv.5)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 130px;">
+        <span class="icon">🟡</span>
+        보통 (Lv.15)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 240px;">
+        <span class="icon">🟠</span>
+        어려움 (Lv.30)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 350px;">
+        <span class="icon">🔴</span>
+        도전 (Lv.40)
+      </div>
+
+      <div id="player-container">
+        <div id="player-nametag">- (Lv.1)</div>
+        <div id="player"></div>
+      </div>
+
+      <div id="field-ui">
+        <div id="dpad">
+          <button id="btn-w" class="pad-btn">W</button>
+          <button id="btn-a" class="pad-btn">A</button>
+          <button id="btn-s" class="pad-btn">S</button>
+          <button id="btn-d" class="pad-btn">D</button>
+        </div>
+
+        <div id="info-panel">
+          <div class="info-row">
+            <span><b>이름:</b> <span id="info-name">-</span></span>
+            <span><b>Lv.</b> <span id="info-level">1</span></span>
+          </div>
+          <div class="info-row">
+            <span><b>체력:</b> <span id="info-hp">100</span>/<span id="info-max-hp">100</span></span>
+          </div>
+          <div class="info-row">
+            <span><b>터치당 뎀:</b> <span id="info-dmg">0.20</span></span>
+          </div>
+          <div>
+            <b>경험치:</b> <span id="info-exp">0</span> / <span id="info-max-exp">100</span>
+            <div class="exp-bg"><div id="exp-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 4. 전투 화면 ================= -->
+    <div id="battle-screen">
+      <div id="game-board">
+        <div id="hero-status" class="status-bar">
+          <span id="battle-hero-name">-</span> (Lv.<span id="battle-hero-lv">1</span>)<br>
+          <div class="hp-bg"><div id="hero-hp-fill" class="hp-fill"></div></div>
+          HP: <span id="hero-hp">100.0</span>/<span id="hero-max-hp">100</span>
+        </div>
+        
+        <div id="blob-status" class="status-bar">
+          <span id="blob-name">BLOB</span><br>
+          <div class="hp-bg"><div id="blob-hp-fill" class="hp-fill"></div></div>
+          HP: <span id="blob-hp">250.0</span>/<span id="blob-max-hp">250</span>
+        </div>
+
+        <div id="hero" class="character">⚔️</div>
+        
+        <div id="touch-box">
+          <div class="box-title">TAP COUNT</div>
+          <div id="touch-count-text" class="box-count">0</div>
+        </div>
+
+        <div id="blob" class="character">👾</div>
+
+        <div id="slash-effect" class="slash-effect">
+          <div class="slash-line"></div>
+        </div>
+      </div>
+
+      <div id="msg-box">당신의 턴입니다! [1]~[4] 키 또는 버튼을 누르세요.</div>
+
+      <div id="ui-container">
+        <button id="btn-attack" class="btn" onclick="handleAttack(event)">⚔️ ATTACK<br>[1] 공격</button>
+        <button id="btn-counter" class="btn" onclick="handleCounter(event)">⚡ COUNTER<br>[2] 반격</button>
+        <button id="btn-dodge" class="btn" onclick="handleDodge(event)">💨 DODGE<br>[3] 회피</button>
+        <button id="btn-run" class="btn" onclick="handleRun(event)">🏃 RUN<br>[4] 후퇴</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================= [플레이어 데이터 & 닉네임] =================
+    let playerName = "";
+    let playerLv = 1;
+    let playerExp = 0;
+    let playerMaxExp = 100;
+    let playerMaxHp = 100;
+    let heroHp = 100.0;
+    let touchDmgMult = 0.20;
+
+    function goToNameScreen() {
+      document.getElementById("title-screen").style.display = "none";
+      document.getElementById("name-screen").style.display = "flex";
+      setTimeout(() => document.getElementById("nickname-input").focus(), 100);
+    }
+
+    function startGameWithNickname(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      
+      const inputVal = document.getElementById("nickname-input").value.trim();
+      
+      if (inputVal === "") {
+        alert("닉네임을 입력해 주세요!");
+        document.getElementById("nickname-input").focus();
+        return;
+      }
+      
+      playerName = inputVal;
+      
+      document.getElementById("info-name").innerText = playerName;
+      document.getElementById("battle-hero-name").innerText = playerName;
+
+      document.getElementById("name-screen").style.display = "none";
+      document.getElementById("field-screen").style.display = "block";
+      
+      isFieldMode = true;
+      updateInfoUI();
+    }
+
+    document.getElementById("nickname-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        startGameWithNickname(e);
+      }
+    });
+
+    // ================= [필드 & 이동 시스템] =================
+    let playerX = 210;
+    let playerY = 200;
+    const moveSpeed = 5;
+
+    const enemiesData = [
+      { id: 'easy', name: '쉬움 (Lv.5)', level: 5, hp: 120, minDmg: 3, maxDmg: 8, exp: 50, x: 20, y: 30, w: 80, h: 70 },
+      { id: 'normal', name: '보통 (Lv.15)', level: 15, hp: 250, minDmg: 5, maxDmg: 15, exp: 120, x: 130, y: 30, w: 80, h: 70 },
+      { id: 'hard', name: '어려움 (Lv.30)', level: 30, hp: 500, minDmg: 12, maxDmg: 25, exp: 300, x: 240, y: 30, w: 80, h: 70 },
+      { id: 'boss', name: '도전 (Lv.40)', level: 40, hp: 1000, minDmg: 20, maxDmg: 40, exp: 700, x: 350, y: 30, w: 80, h: 70 }
+    ];
+
+    let currentEnemy = null;
+    let isFieldMode = false;
+
+    const keys = { w: false, a: false, s: false, d: false };
+
+    window.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase();
+      if (isFieldMode) {
+        if (k === 'w' || k === 'ㅈ') keys.w = true;
+        if (k === 'a' || k === 'ㅁ') keys.a = true;
+        if (k === 's' || k === 'ㄴ') keys.s = true;
+        if (k === 'd' || k === 'ㅇ') keys.d = true;
+      } else if (document.getElementById("battle-screen").style.display === "block") {
+        if (isCooltime) return;
+        if (isAttackingMode || isDodgeMode) {
+          registerInput();
+          return;
+        }
+        if (e.key === "1") handleAttack(e);
+        else if (e.key === "2") handleCounter(e);
+        else if (e.key === "3" && !dodgeDisabledTurn) handleDodge(e);
+        else if (e.key === "4") handleRun(e);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'ㅈ') keys.w = false;
+      if (k === 'a' || k === 'ㅁ') keys.a = false;
+      if (k === 's' || k === 'ㄴ') keys.s = false;
+      if (k === 'd' || k === 'ㅇ') keys.d = false;
+    });
+
+    function bindPadBtn(id, key) {
+      const btn = document.getElementById(id);
+      btn.addEventListener("pointerdown", (e) => { e.stopPropagation(); keys[key] = true; });
+      btn.addEventListener("pointerup", (e) => { e.stopPropagation(); keys[key] = false; });
+      btn.addEventListener("pointerleave", (e) => { e.stopPropagation(); keys[key] = false; });
+    }
+    bindPadBtn("btn-w", "w");
+    bindPadBtn("btn-a", "a");
+    bindPadBtn("btn-s", "s");
+    bindPadBtn("btn-d", "d");
+
+    function fieldLoop() {
+      if (isFieldMode) {
+        if (keys.w) playerY = Math.max(10, playerY - moveSpeed);
+        if (keys.s) playerY = Math.min(270, playerY + moveSpeed);
+        if (keys.a) playerX = Math.max(10, playerX - moveSpeed);
+        if (keys.d) playerX = Math.min(410, playerX + moveSpeed);
+
+        const playerContainer = document.getElementById("player-container");
+        playerContainer.style.left = playerX + "px";
+        playerContainer.style.top = playerY + "px";
+
+        checkEnemyCollision();
+      }
+      requestAnimationFrame(fieldLoop);
+    }
+    requestAnimationFrame(fieldLoop);
+
+    function checkEnemyCollision() {
+      const pRect = { x: playerX, y: playerY, w: 40, h: 40 };
+      for (let enemy of enemiesData) {
+        if (
+          pRect.x < enemy.x + enemy.w &&
+          pRect.x + pRect.w > enemy.x &&
+          pRect.y < enemy.y + enemy.h &&
+          pRect.y + pRect.h > enemy.y
+        ) {
+          startBattle(enemy);
+          break;
+        }
+      }
+    }
+
+    function updateInfoUI() {
+      document.getElementById("info-name").innerText = playerName;
+      document.getElementById("info-level").innerText = playerLv;
+      document.getElementById("info-hp").innerText = heroHp;
+      document.getElementById("info-max-hp").innerText = playerMaxHp;
+      document.getElementById("info-dmg").innerText = touchDmgMult.toFixed(2);
+      document.getElementById("info-exp").innerText = playerExp;
+      document.getElementById("info-max-exp").innerText = playerMaxExp;
+      document.getElementById("exp-fill").style.width = `${(playerExp / playerMaxExp) * 100}%`;
+      
+      document.getElementById("player-nametag").innerText = `${playerName} (Lv.${playerLv})`;
+    }
+
+    function gainExp(amount) {
+      playerExp += amount;
+      while (playerExp >= playerMaxExp) {
+        playerExp -= playerMaxExp;
+        playerLv++;
+        
+        touchDmgMult += 0.20;
+        playerMaxHp += 25;
+        heroHp = playerMaxHp; // 레벨업 시 현재 체력도 최대 체력과 동일하게 풀회복
+
+        if (playerLv >= 3) {
+          playerMaxExp += 50;
+        }
+        alert(`🎉 LEVEL UP! 레벨 ${playerLv} 달성!\n체력 +25 (최대 ${playerMaxHp}) | 터치당 데미지 +0.20 (총 ${touchDmgMult.toFixed(2)})`);
+      }
+      updateInfoUI();
+    }
+
+    // ================= [전투 시스템] =================
+    let blobHp = 250.0;
+    let blobMaxHp = 250.0;
+    let stance = 'none';
+    let isAttackingMode = false;
+    let isDodgeMode = false;
+    let touchCount = 0;
+    let timer = null;
+    let isCooltime = false;
+    let dodgeDisabledTurn = false;
+
+    function startBattle(enemy) {
+      isFieldMode = false;
+      currentEnemy = enemy;
+
+      keys.w = keys.a = keys.s = keys.d = false;
+
+      heroHp = playerMaxHp;
+      blobHp = enemy.hp;
+      blobMaxHp = enemy.hp;
+
+      document.getElementById("battle-hero-name").innerText = playerName;
+      document.getElementById("battle-hero-lv").innerText = playerLv;
+      document.getElementById("blob-name").innerText = enemy.name;
+      document.getElementById("hero-max-hp").innerText = playerMaxHp;
+      document.getElementById("blob-max-hp").innerText = blobMaxHp;
+
+      updateHpUI();
+
+      document.getElementById("field-screen").style.display = "none";
+      document.getElementById("battle-screen").style.display = "block";
+
+      document.getElementById("msg-box").innerText = `⚔️ ${enemy.name}과의 전투 시작! 당신의 턴입니다.`;
+      disableButtons(false);
+    }
+
+    function exitBattle(isVictory) {
+      isAttackingMode = false;
+      isDodgeMode = false;
+      isCooltime = false;
+      if (timer) clearInterval(timer);
+
+      document.getElementById("battle-screen").style.display = "none";
+      document.getElementById("field-screen").style.display = "block";
+
+      playerX = 210;
+      playerY = 200;
+      isFieldMode = true;
+
+      if (isVictory && currentEnemy) {
+        gainExp(currentEnemy.exp);
+      }
+      updateInfoUI();
+    }
+
+    function handleRun(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (isCooltime) return;
+      alert("🏃 전투에서 후퇴했습니다!");
+      exitBattle(false);
+    }
+
+    function updateTouchBox() {
+      const box = document.getElementById("touch-box");
+      const text = document.getElementById("touch-count-text");
+      text.innerText = touchCount;
+
+      box.classList.remove("tier-yellow", "tier-orange", "tier-red", "tier-white");
+
+      if (touchCount >= 130) box.classList.add("tier-white");
+      else if (touchCount >= 100) box.classList.add("tier-red");
+      else if (touchCount >= 60) box.classList.add("tier-orange");
+      else if (touchCount >= 30) box.classList.add("tier-yellow");
+    }
+
+    function registerInput() {
+      if (isAttackingMode) {
+        touchCount++;
+        updateTouchBox();
+        let critRate = (touchCount * 0.3).toFixed(1);
+        document.getElementById("msg-box").innerText = `🔥 연타! (${touchCount}회) | 크리티컬 확률: ${critRate}%`;
+      } else if (isDodgeMode) {
+        touchCount++;
+        updateTouchBox();
+        let dodgeRate = (Math.floor(touchCount / 10) * 5);
+        document.getElementById("msg-box").innerText = `💨 회피 연타! (${touchCount}회) | 회피 성공률: ${dodgeRate}%`;
+      }
+    }
+
+    window.addEventListener("pointerdown", (e) => {
+      if (!isFieldMode && document.getElementById("battle-screen").style.display === "block") {
+        registerInput();
+      }
+    });
+
+    function handleAttack(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!isAttackingMode && !isCooltime) {
+        isAttackingMode = true;
+        touchCount = 0;
+        updateTouchBox();
+        disableButtons(true);
+        
+        let timeLeft = 5;
+        document.getElementById("msg-box").innerText = `🔥 5초간 연타하세요!`;
+        
+        timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            finishPlayerAttack();
+          }
+        }, 1000);
+      }
+    }
+
+    function finishPlayerAttack() {
+      isAttackingMode = false;
+      let baseDamage = touchCount * touchDmgMult;
+      let critRate = (touchCount * 0.3) / 100;
+      let isCrit = Math.random() < critRate;
+
+      let finalDamage = isCrit ? baseDamage * 2 : baseDamage;
+      finalDamage = parseFloat(finalDamage.toFixed(1));
+
+      blobHp = Math.max(0, blobHp - finalDamage).toFixed(1);
+
+      triggerSlashEffect();
+
+      setTimeout(() => {
+        if (isCrit) triggerCritGlow();
+        triggerShake();
+        showFloatingText(finalDamage, 'blob', isCrit);
+        updateHpUI();
+
+        let critMsg = isCrit ? " 💥 [CRITICAL HIT! 2배]" : "";
+        document.getElementById("msg-box").innerText = `⚔️ ${touchCount}회 연타! ${finalDamage} 데미지!${critMsg}`;
+
+        if (blobHp <= 0) {
+          setTimeout(() => { 
+            alert(`🎉 ${currentEnemy.name} 처치 성공! (+${currentEnemy.exp} EXP)`); 
+            exitBattle(true); 
+          }, 500);
+        } else {
+          setTimeout(enemyTurn, 1500);
+        }
+      }, 150);
+    }
+
+    function handleCounter(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (isCooltime) return;
+      stance = 'counter';
+      document.getElementById("msg-box").innerText = "⚡ 반격 태세를 취했습니다!";
+      disableButtons(true);
+      setTimeout(enemyTurn, 1500);
+    }
+
+    function handleDodge(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!isDodgeMode && !isCooltime && !dodgeDisabledTurn) {
+        isDodgeMode = true;
+        touchCount = 0;
+        updateTouchBox();
+        disableButtons(true);
+        
+        let timeLeft = 5;
+        document.getElementById("msg-box").innerText = `💨 5초간 연타하여 회피 확률을 올리세요!`;
+        
+        timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            finishDodgeSetup();
+          }
+        }, 1000);
+      }
+    }
+
+    function finishDodgeSetup() {
+      isDodgeMode = false;
+      let dodgeRate = (Math.floor(touchCount / 10) * 5);
+      let isDodged = Math.random() < (dodgeRate / 100);
+
+      document.getElementById("msg-box").innerText = `💨 회피 준비 완료! (성공률: ${dodgeRate}%)`;
+      setTimeout(() => { enemyTurn(isDodged); }, 1500);
+    }
+
+    function enemyTurn(isDodged = false) {
+      let minD = currentEnemy ? currentEnemy.minDmg : 5;
+      let maxD = currentEnemy ? currentEnemy.maxDmg : 15;
+      let rawDamage = Math.floor(Math.random() * (maxD - minD + 1)) + minD; 
+      let finalDamage = rawDamage;
+
+      if (isDodged) {
+        dodgeDisabledTurn = true;
+        document.getElementById("msg-box").innerText = `💨 회피 성공! 적의 턴이 스킵되었습니다!`;
+        stance = 'none';
+        startCooltime();
+        return;
+      }
+
+      dodgeDisabledTurn = false;
+      finalDamage = parseFloat(finalDamage.toFixed(1));
+      heroHp = Math.max(0, heroHp - finalDamage).toFixed(1);
+
+      triggerShake();
+      showFloatingText(finalDamage, 'hero');
+      updateHpUI();
+
+      if (stance === 'counter') {
+        let counterDamage = parseFloat((finalDamage * 2).toFixed(1));
+        blobHp = Math.max(0, blobHp - counterDamage).toFixed(1);
+
+        document.getElementById("msg-box").innerText = `⚡ ${finalDamage} 피해를 입고 ${counterDamage} 데미지로 반격했습니다!`;
+        
+        setTimeout(() => {
+          triggerSlashEffect();
+          triggerShake();
+          showFloatingText(counterDamage, 'blob', true);
+          updateHpUI();
+        }, 800);
+
+      } else {
+        document.getElementById("msg-box").innerText = `👾 ${currentEnemy.name}의 공격! ${finalDamage} 데미지를 입었습니다.`;
+      }
+
+      stance = 'none';
+
+      if (heroHp <= 0) {
+        setTimeout(() => { 
+          alert("💀 패배하셨습니다... 마을로 돌아갑니다."); 
+          exitBattle(false); 
+        }, 500);
+      } else if (blobHp <= 0) {
+        setTimeout(() => { 
+          alert(`🎉 반격으로 ${currentEnemy.name} 처치 성공! (+${currentEnemy.exp} EXP)`); 
+          exitBattle(true); 
+        }, 1200);
+      } else {
+        startCooltime();
+      }
+    }
+
+    function startCooltime() {
+      isCooltime = true;
+      let coolTime = 3;
+      setTimeout(() => {
+        let coolTimer = setInterval(() => {
+          coolTime--;
+          if (coolTime > 0) {
+            document.getElementById("msg-box").innerText = `⏳ 턴 대기 시간... ${coolTime}초 남음`;
+          } else {
+            clearInterval(coolTimer);
+            isCooltime = false;
+            document.getElementById("msg-box").innerText = dodgeDisabledTurn ? "당신의 턴입니다! (지난턴 회피로 💨 회피 쿨다운)" : "당신의 턴입니다! [1]~[4] 키를 누르세요.";
+            disableButtons(false);
+          }
+        }, 1000);
+      }, 1000);
+    }
+
+    function triggerSlashEffect() {
+      const slash = document.getElementById("slash-effect");
+      slash.style.display = "block";
+      slash.classList.add("slash-active");
+      setTimeout(() => {
+        slash.classList.remove("slash-active");
+        slash.style.display = "none";
+      }, 300);
+    }
+
+    function triggerShake() {
+      const board = document.getElementById("game-board");
+      board.classList.add("shake");
+      setTimeout(() => { board.classList.remove("shake"); }, 350);
+    }
+
+    function triggerCritGlow() {
+      const board = document.getElementById("game-board");
+      board.classList.add("crit-glow");
+      setTimeout(() => { board.classList.remove("crit-glow"); }, 600);
+    }
+
+    function showFloatingText(damage, target, isCrit = false) {
+      const board = document.getElementById("game-board");
+      const text = document.createElement("div");
+      text.className = `floating-damage ${isCrit ? 'crit' : ''}`;
+      text.innerText = isCrit ? `💥-${damage}` : `-${damage}`;
+      
+      if (target === 'blob') {
+        text.style.right = "50px";
+        text.style.top = "70px";
+      } else {
+        text.style.left = "50px";
+        text.style.top = "70px";
+        text.style.color = "#ff9900";
+      }
+
+      board.appendChild(text);
+      setTimeout(() => { text.remove(); }, 800);
+    }
+
+    function updateHpUI() {
+      document.getElementById("hero-hp").innerText = heroHp;
+      document.getElementById("blob-hp").innerText = blobHp;
+      document.getElementById("hero-hp-fill").style.width = `${(heroHp / playerMaxHp) * 100}%`;
+      document.getElementById("blob-hp-fill").style.width = `${(blobHp / blobMaxHp) * 100}%`;
+    }
+
+    function disableButtons(status) {
+      document.getElementById("btn-attack").disabled = status;
+      document.getElementById("btn-counter").disabled = status;
+      document.getElementById("btn-dodge").disabled = status || dodgeDisabledTurn;
+      document.getElementById("btn-run").disabled = status;
+    }
+  </script>
+</body>
+</html>
