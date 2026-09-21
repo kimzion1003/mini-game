@@ -26,11 +26,132 @@
       overflow-x: hidden;
     }
 
+    /* 기본 해상도 컨테이너 */
     #game-container {
       width: 100%;
       max-width: 900px;
       padding: 10px;
       margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+
+    /* ================= 💻 컴퓨터 모드 스타일 ================= */
+    body.mode-pc #game-container {
+      max-width: 1150px;
+    }
+    body.mode-pc #title-screen,
+    body.mode-pc #name-screen {
+      min-height: 550px;
+    }
+    body.mode-pc #field-screen {
+      height: 700px;
+    }
+    body.mode-pc #game-board {
+      height: 480px;
+    }
+    body.mode-pc .character {
+      font-size: 90px;
+      top: 180px;
+    }
+    body.mode-pc #touch-box {
+      top: 190px;
+      width: 150px;
+      height: 100px;
+    }
+    body.mode-pc #touch-box .box-count { font-size: 40px; }
+    body.mode-pc .btn {
+      padding: 22px 0;
+      font-size: 17px;
+    }
+
+    /* ================= 📱 모바일 모드 스타일 ================= */
+    body.mode-mobile #game-container {
+      max-width: 480px;
+      padding: 5px;
+    }
+    body.mode-mobile #title-screen,
+    body.mode-mobile #name-screen {
+      min-height: 480px;
+      padding: 20px 15px;
+    }
+    body.mode-mobile #field-screen {
+      height: 520px;
+    }
+    body.mode-mobile #game-board {
+      height: 320px;
+    }
+    body.mode-mobile .character {
+      font-size: 55px;
+      top: 120px;
+    }
+    body.mode-mobile #touch-box {
+      top: 130px;
+      width: 90px;
+      height: 65px;
+    }
+    body.mode-mobile #touch-box .box-count { font-size: 22px; }
+    body.mode-mobile #field-ui {
+      flex-direction: column;
+      height: auto;
+      gap: 10px;
+    }
+    body.mode-mobile #info-panel {
+      width: 100%;
+      margin-left: 0;
+      height: auto;
+    }
+    body.mode-mobile .btn {
+      padding: 12px 0;
+      font-size: 12px;
+    }
+
+    /* ================= 0. 기기 선택 화면 ================= */
+    #device-screen {
+      width: 100%;
+      min-height: 450px;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 30px;
+    }
+
+    .device-title {
+      font-size: clamp(20px, 3.5vw, 28px);
+      font-weight: bold;
+      color: #00ff88;
+    }
+
+    .device-btn-group {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .device-btn {
+      flex: 1;
+      padding: 25px 15px;
+      font-size: clamp(16px, 2.5vw, 20px);
+      font-weight: bold;
+      font-family: inherit;
+      background: #111;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .device-btn:hover {
+      background: #fff;
+      color: #000;
+      box-shadow: 0 0 15px #fff;
     }
 
     /* ================= 1. 타이틀 화면 ================= */
@@ -43,7 +164,7 @@
       position: relative;
       cursor: pointer;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-      display: flex;
+      display: none;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
@@ -176,7 +297,7 @@
       position: absolute;
       width: 18%;
       max-width: 130px;
-      min-width: 90px;
+      min-width: 75px;
       height: 80px;
       border: 2px solid #ff4444;
       background-color: #2a1111;
@@ -185,12 +306,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: #fff;
       box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
     }
-    .enemy-node .icon { font-size: 24px; margin-bottom: 2px; }
+    .enemy-node .icon { font-size: 22px; margin-bottom: 2px; }
 
     #player-container {
       position: absolute;
@@ -228,7 +349,6 @@
       bottom: 15px;
       left: 15px;
       right: 15px;
-      height: 180px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -242,6 +362,7 @@
       width: 140px;
       height: 140px;
       position: relative;
+      flex-shrink: 0;
     }
     .pad-btn {
       position: absolute;
@@ -268,7 +389,6 @@
       flex: 1;
       max-width: 450px;
       margin-left: 20px;
-      height: 140px;
       background: #111;
       border: 2px solid #555;
       border-radius: 8px;
@@ -336,17 +456,17 @@
 
     .status-bar {
       position: absolute;
-      top: 20px;
+      top: 15px;
       font-weight: bold;
-      font-size: clamp(13px, 2vw, 16px);
+      font-size: clamp(12px, 2vw, 16px);
       text-align: left;
     }
-    #hero-status { left: 25px; color: #4facfe; }
-    #blob-status { right: 25px; text-align: right; color: #ff0844; }
+    #hero-status { left: 15px; color: #4facfe; }
+    #blob-status { right: 15px; text-align: right; color: #ff0844; }
 
     .hp-bg {
-      width: clamp(120px, 20vw, 200px);
-      height: 16px;
+      width: clamp(100px, 18vw, 200px);
+      height: 14px;
       background: #444;
       border: 1px solid #fff;
       margin-top: 5px;
@@ -434,7 +554,7 @@
       font-weight: bold;
       color: #ffff00;
       margin: 15px 0;
-      font-size: clamp(14px, 2vw, 17px);
+      font-size: clamp(13px, 2vw, 17px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -452,7 +572,7 @@
     .btn {
       flex: 1;
       padding: 16px 0;
-      font-size: clamp(12px, 1.8vw, 15px);
+      font-size: clamp(11px, 1.8vw, 15px);
       font-weight: bold;
       font-family: inherit;
       border: 2px solid #fff;
@@ -470,6 +590,15 @@
 <body>
 
   <div id="game-container">
+
+    <!-- ================= 0. 모드 선택 화면 ================= -->
+    <div id="device-screen">
+      <div class="device-title">🎮 접속할 환경을 선택하세요</div>
+      <div class="device-btn-group">
+        <button class="device-btn" onclick="selectDeviceMode('pc')">💻 컴퓨터 모드</button>
+        <button class="device-btn" onclick="selectDeviceMode('mobile')">📱 모바일 모드</button>
+      </div>
+    </div>
 
     <!-- ================= 1. 타이틀 화면 ================= -->
     <div id="title-screen" onclick="goToNameScreen()">
@@ -579,6 +708,17 @@
   </div>
 
   <script>
+    // ================= [모드 선택 스크립트] =================
+    function selectDeviceMode(mode) {
+      if (mode === 'pc') {
+        document.body.classList.add('mode-pc');
+      } else {
+        document.body.classList.add('mode-mobile');
+      }
+      document.getElementById("device-screen").style.display = "none";
+      document.getElementById("title-screen").style.display = "flex";
+    }
+
     // ================= [플레이어 데이터 & 닉네임] =================
     let playerName = "";
     let playerLv = 1;
@@ -652,7 +792,7 @@
       });
 
       playerX = fw / 2 - 20;
-      playerY = 240;
+      playerY = field.clientHeight - 220;
     }
 
     window.addEventListener("resize", () => {
@@ -707,7 +847,7 @@
       if (isFieldMode) {
         const field = document.getElementById("field-screen");
         const maxW = field.clientWidth - 40;
-        const maxH = field.clientHeight - 200;
+        const maxH = field.clientHeight - (document.body.classList.contains('mode-mobile') ? 280 : 200);
 
         if (keys.w) playerY = Math.max(10, playerY - moveSpeed);
         if (keys.s) playerY = Math.min(maxH, playerY + moveSpeed);
