@@ -676,11 +676,16 @@
         if (k === 's' || k === 'ㄴ') keys.s = true;
         if (k === 'd' || k === 'ㅇ') keys.d = true;
       } else if (document.getElementById("battle-screen").style.display === "block") {
-        if (isCooltime) return;
+        // 전투 중일 때 처리
         if (isAttackingMode || isDodgeMode) {
+          // 연타 모드 진행 중이면 아무 키나 누르더라도 연타로 인식!
           registerInput();
           return;
         }
+
+        if (isCooltime) return;
+
+        // 턴 선택 메뉴 단축키
         if (e.key === "1") handleAttack(e);
         else if (e.key === "2") handleCounter(e);
         else if (e.key === "3" && !dodgeDisabledTurn) handleDodge(e);
@@ -862,6 +867,7 @@
       }
     }
 
+    // 화면 클릭/터치 시 연타 등록
     window.addEventListener("pointerdown", (e) => {
       if (!isFieldMode && document.getElementById("battle-screen").style.display === "block") {
         registerInput();
@@ -877,7 +883,7 @@
         disableButtons(true);
         
         let timeLeft = 5;
-        document.getElementById("msg-box").innerText = `🔥 5초간 연타하세요!`;
+        document.getElementById("msg-box").innerText = `🔥 5초간 아무 키나 마구 누르세요!`;
         
         timer = setInterval(() => {
           timeLeft--;
@@ -940,7 +946,7 @@
         disableButtons(true);
         
         let timeLeft = 5;
-        document.getElementById("msg-box").innerText = `💨 5초간 연타하여 회피 확률을 올리세요!`;
+        document.getElementById("msg-box").innerText = `💨 5초간 아무 키나 누르면 회피 확률이 올라갑니다!`;
         
         timer = setInterval(() => {
           timeLeft--;
