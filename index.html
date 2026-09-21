@@ -263,7 +263,7 @@
       transform: translateX(-50%);
       width: 500px;
       max-width: 90%;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       border: 3px solid #fff;
       border-radius: 12px;
       padding: 15px;
@@ -284,6 +284,27 @@
       cursor: pointer;
       color: #ff4444;
       font-weight: bold;
+      font-size: 18px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+      padding: 4px 8px;
+      background: #222;
+      border-radius: 6px;
+    }
+
+    .stat-btn {
+      padding: 2px 10px;
+      background: #00ff88;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     /* ================= 4. 전투 화면 ================= */
@@ -296,17 +317,20 @@
       border-radius: 10px;
     }
     .status-bar { position: absolute; top: 15px; font-weight: bold; font-size: 15px; }
-    #hero-status { left: 15px; color: #4facfe; }
+    #hero-status { left: 15px; color: #4facfe; text-align: left; }
     #blob-status { right: 15px; text-align: right; color: #ff0844; }
     .character { position: absolute; top: 180px; font-size: 80px; }
     #hero { left: 10%; } #blob { right: 10%; }
     #touch-box {
-      position: absolute; top: 190px; left: 50%; transform: translateX(-50%);
-      width: 140px; height: 90px; background: #1a1a1a; border: 3px solid #555;
+      position: absolute; top: 180px; left: 50%; transform: translateX(-50%);
+      width: 160px; height: 110px; background: #1a1a1a; border: 3px solid #555;
       border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer;
     }
+    #touch-box:active { background: #333; transform: translateX(-50%) scale(0.98); }
     #ui-container { display: flex; gap: 10px; margin-top: 10px; }
     .btn { flex: 1; padding: 18px 0; font-size: 16px; font-weight: bold; border: 2px solid #fff; background: #000; color: #fff; border-radius: 8px; cursor: pointer; }
+    .btn:hover { background: #222; }
   </style>
 </head>
 <body>
@@ -396,13 +420,18 @@
           HP: <span id="blob-hp">100</span>/<span id="blob-max-hp">100</span>
         </div>
         <div id="hero" class="character">⚔️</div>
-        <div id="touch-box">
-          <div style="font-size:11px; color:#aaa;">TAP COUNT</div>
-          <div id="touch-count-text" style="font-size:32px; font-weight:bold;">0</div>
+
+        <!-- 터치 타격 영역 -->
+        <div id="touch-box" onclick="handleAttack(event)">
+          <div style="font-size:11px; color:#aaa;">TAP HERE TO ATTACK</div>
+          <div id="touch-count-text" style="font-size:32px; font-weight:bold; color:#00ff88;">0</div>
         </div>
+
         <div id="blob" class="character">👾</div>
       </div>
-      <div id="msg-box" style="margin:10px 0; font-weight:bold; color:#ffff00;">전투 시작!</div>
+
+      <div id="msg-box" style="margin:10px 0; font-weight:bold; color:#ffff00;">전투 시작! 연타하여 공격하세요!</div>
+
       <div id="ui-container">
         <button id="btn-attack" class="btn" onclick="handleAttack(event)">⚔️ 공격</button>
         <button id="btn-run" class="btn" style="border-color:#ff8800; color:#ff8800;" onclick="handleRun(event)">🏃 후퇴</button>
@@ -427,7 +456,7 @@
     let baseHp = 100;
     let playerMaxHp = 100;
     let heroHp = 100;
-    let touchDmgMult = 0.20;
+    let touchDmgMult = 10;
 
     // 맵 정의
     const MAPS = [
@@ -511,7 +540,7 @@
     function recalcStats() {
       playerMaxHp = baseHp + (playerLv - 1) * 20 + bonusHp * 15;
       heroHp = playerMaxHp;
-      touchDmgMult = 0.20 + (bonusAtk * 0.05);
+      touchDmgMult = 10 + (bonusAtk * 5); // 기본 데미지 10 + 포인트당 5 증가
     }
 
     // ================= [카메라 & 필드 시스템] =================
@@ -643,31 +672,40 @@
       if (type === 'stat') {
         title.innerText = "📊 스탯 관리";
         content.innerHTML = `
-          <div style="text-align:left; line-height: 2;">
-            <div>사용 가능한 스탯 포인트: <b>${statPoints}</b></div>
-            <hr style="border-color:#444;">
-            <div>⚔️ 공격력 레벨: ${bonusAtk} <button onclick="addStat('atk')">+</button></div>
-            <div>❤️ 최대 체력 레벨: ${bonusHp} <button onclick="addStat('hp')">+</button></div>
-            <div>💨 회피율 레벨: ${bonusDodge} <button onclick="addStat('dodge')">+</button></div>
+          <div style="text-align:left; line-height: 1.8;">
+            <div style="color:#ffff00; font-weight:bold; margin-bottom:10px;">사용 가능한 스탯 포인트: ${statPoints}</div>
+            <div class="stat-row">
+              <span>⚔️ 공격력 (+${bonusAtk * 5})</span>
+              <button class="stat-btn" onclick="addStat('atk')">+1</button>
+            </div>
+            <div class="stat-row">
+              <span>❤️ 최대 체력 (+${bonusHp * 15})</span>
+              <button class="stat-btn" onclick="addStat('hp')">+1</button>
+            </div>
+            <div class="stat-row">
+              <span>💨 회피율 (+${bonusDodge}%)</span>
+              <button class="stat-btn" onclick="addStat('dodge')">+1</button>
+            </div>
           </div>
         `;
       } else if (type === 'skill') {
         title.innerText = "🔮 스킬 정보";
-        content.innerHTML = `<div>아직 해금된 스킬이 없습니다. (추후 업데이트 예정)</div>`;
+        content.innerHTML = `<div style="padding: 20px 0;">추후 다양한 전투 스킬이 추가될 예정입니다.</div>`;
       } else if (type === 'mutation') {
-        title.innerText = "🧬 변이 정보";
+        title.innerText = "🧬 변이 시스템";
         if (playerLv < 15) {
-          content.innerHTML = `<div style="color:#ff4444;">🔒 [변이] 기능은 레벨 15에 해금됩니다! (현재 Lv.${playerLv})</div>`;
+          content.innerHTML = `<div style="color:#ff4444; padding: 20px 0;">🔒 [변이] 기능은 레벨 15에 해금됩니다!<br>(현재 레벨: Lv.${playerLv})</div>`;
         } else {
-          content.innerHTML = `<div>🧪 변이 연구소가 활성화되었습니다. (추후 구현 예정)</div>`;
+          content.innerHTML = `<div style="color:#00ff88; padding: 20px 0;">🧪 변이 시스템이 해금되었습니다. (추후 구현 예정)</div>`;
         }
       } else if (type === 'info') {
         title.innerText = "ℹ️ 유저 정보";
         content.innerHTML = `
-          <div style="text-align:left;">
-            <div>닉네임: ${playerName}</div>
-            <div>레벨: ${playerLv} / 50 (최대)</div>
-            <div>경험치: ${playerExp} / ${playerMaxExp}</div>
+          <div style="text-align:left; line-height: 1.8; padding: 10px;">
+            <div><b>플레이어 닉네임:</b> ${playerName}</div>
+            <div><b>레벨:</b> Lv.${playerLv} / 50 (최대)</div>
+            <div><b>경험치:</b> ${playerExp} / ${playerMaxExp}</div>
+            <div><b>현재 위치:</b> ${MAPS[currentMapIdx].name} 맵</div>
           </div>
         `;
       }
@@ -691,10 +729,12 @@
     // ================= [전투 시스템] =================
     let currentEnemy = null;
     let battleBlobHp = 100, battleBlobMaxHp = 100;
+    let battleTouchCount = 0;
 
     function startBattle(enemy) {
       isFieldActive = false;
       currentEnemy = enemy;
+      battleTouchCount = 0;
 
       battleBlobMaxHp = enemy.lv * 25;
       battleBlobHp = battleBlobMaxHp;
@@ -706,20 +746,20 @@
       document.getElementById("hero-max-hp").innerText = playerMaxHp;
       document.getElementById("blob-hp").innerText = battleBlobHp;
       document.getElementById("blob-max-hp").innerText = battleBlobMaxHp;
+      document.getElementById("touch-count-text").innerText = "0";
 
       document.getElementById("field-screen").style.display = "none";
       document.getElementById("battle-screen").style.display = "block";
     }
 
-    let battleTouchCount = 0;
     function handleAttack(e) {
       if (e) e.stopPropagation();
       battleTouchCount++;
       document.getElementById("touch-count-text").innerText = battleTouchCount;
 
-      let dmg = (battleTouchCount * touchDmgMult).toFixed(1);
-      battleBlobHp = Math.max(0, battleBlobMaxHp - dmg);
-      document.getElementById("blob-hp").innerText = battleBlobHp.toFixed(1);
+      let dmg = touchDmgMult;
+      battleBlobHp = Math.max(0, battleBlobHp - dmg);
+      document.getElementById("blob-hp").innerText = Math.ceil(battleBlobHp);
 
       if (battleBlobHp <= 0) {
         alert("🎉 승리했습니다!");
@@ -742,7 +782,7 @@
     }
 
     function gainExp(exp) {
-      if (playerLv >= 50) return; // 최대 레벨 50 제한
+      if (playerLv >= 50) return; // 최대 레벨 50
       playerExp += exp;
       while (playerExp >= playerMaxExp && playerLv < 50) {
         playerExp -= playerMaxExp;
