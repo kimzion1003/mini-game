@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>턴제 RPG 미니게임</title>
+  <title>턴제형 미니게임</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,497 +14,363 @@
 
     body {
       text-align: center;
-      background-color: #0d0d0d;
+      background-color: #121212;
       color: #ffffff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Courier New', Courier, monospace;
       margin: 0;
       padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
-    /* 화면 크기 통일 컨테이너 (850x620) */
     #game-container {
-      width: 850px;
-      height: 620px;
-      background-color: #1a1a1a;
-      border: 3px solid #444;
-      border-radius: 12px;
+      width: 100%;
+      max-width: 900px;
+      padding: 10px;
+      margin: 0 auto;
+    }
+
+    /* ================= 1. 타이틀 화면 ================= */
+    #title-screen {
+      width: 100%;
+      min-height: 450px;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 30px rgba(0,0,0,0.9);
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px 30px 20px 30px;
     }
 
-    /* 공통 버튼 스타일 */
-    .btn {
-      font-family: inherit;
-      font-weight: bold;
-      border: 2px solid #fff;
-      background: #111;
-      color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn:hover:not(:disabled) {
-      background: #333;
-      border-color: #00ff88;
-      color: #00ff88;
-    }
-    .btn:active:not(:disabled) {
-      transform: scale(0.96);
-    }
-    .btn:disabled {
-      border-color: #444;
-      color: #555;
-      cursor: not-allowed;
-      background: #000;
-    }
-
-    /* 1. 계정 (로그인/회원가입) 화면 */
-    #auth-screen {
+    .title-a {
       width: 100%;
-      height: 100%;
-      display: flex;
+      padding: 25px 15px;
+      border: 3px solid #fff;
+      background: #111;
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: bold;
+      color: #4facfe;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(79, 172, 254, 0.4);
+    }
+
+    .title-b {
+      width: 100%;
+      padding: 20px;
+      border: 2px dashed #777;
+      background: rgba(0, 0, 0, 0.5);
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: #ffff00;
+      border-radius: 10px;
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .title-c {
+      align-self: flex-end;
+      padding: 8px 16px;
+      border: 1px solid #555;
+      background: #000;
+      font-size: 13px;
+      color: #aaa;
+      border-radius: 6px;
+    }
+
+    /* ================= 2. 닉네임 입력 화면 ================= */
+    #name-screen {
+      width: 100%;
+      min-height: 450px;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
+      position: relative;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: radial-gradient(circle, #2a2a2a 0%, #0d0d0d 100%);
-      padding: 20px;
+      padding: 40px 30px;
+      gap: 30px;
     }
-    .auth-card {
-      width: 360px;
-      padding: 30px;
-      background: rgba(20, 20, 20, 0.95);
-      border: 2px solid #555;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,255,136,0.1);
-    }
-    .auth-title {
-      font-size: 26px;
-      font-weight: bold;
-      color: #00ff88;
-      margin-bottom: 20px;
-      text-shadow: 0 0 8px rgba(0,255,136,0.4);
-    }
-    .auth-input {
+
+    .name-aa {
       width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      background: #000;
-      border: 1px solid #555;
-      border-radius: 6px;
+      padding: 20px;
+      border: 2px solid #fff;
+      background: #111;
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: bold;
       color: #fff;
-      font-size: 15px;
+      border-radius: 10px;
+    }
+
+    .name-input-group {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .name-bb {
+      flex: 1;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      font-family: inherit;
+      background: #000;
+      color: #00ff88;
+      border: 2px solid #777;
+      border-radius: 8px;
       text-align: center;
       outline: none;
     }
-    .auth-input:focus {
+
+    .name-bb:focus {
       border-color: #00ff88;
-    }
-    .auth-btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .auth-btn-group .btn {
-      flex: 1;
-      padding: 12px 0;
-      font-size: 15px;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
     }
 
-    /* 2. 필드 및 카메라 뷰포트 시스템 */
+    .name-cc {
+      padding: 0 25px;
+      font-size: 16px;
+      font-weight: bold;
+      font-family: inherit;
+      background: #333;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .name-cc:active {
+      background: #fff;
+      color: #000;
+    }
+
+    /* ================= 3. 필드 화면 ================= */
     #field-screen {
       width: 100%;
-      height: 100%;
+      height: 600px;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      background-color: #1e1e1e;
       position: relative;
       overflow: hidden;
-      background-color: #050505;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       display: none;
     }
 
-    /* 1600x1000 월드 맵 */
-    #world-map {
-      width: 1600px;
-      height: 1000px;
+    .enemy-node {
       position: absolute;
-      top: 0;
-      left: 0;
-      background-color: #181c24;
-      background-image: 
-        radial-gradient(#2a3245 15%, transparent 16%),
-        radial-gradient(#2a3245 15%, transparent 16%);
-      background-size: 60px 60px;
-      background-position: 0 0, 30px 30px;
+      width: 18%;
+      max-width: 130px;
+      min-width: 90px;
+      height: 80px;
+      border: 2px solid #ff4444;
+      background-color: #2a1111;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
     }
+    .enemy-node .icon { font-size: 24px; margin-bottom: 2px; }
 
-    /* 포탈 */
-    .portal {
+    #player-container {
       position: absolute;
       width: 80px;
-      height: 120px;
-      border-radius: 40px;
+      height: 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 13px;
-      color: #fff;
-      box-shadow: 0 0 20px currentColor;
-      animation: pulse 1.5s infinite alternate;
-    }
-    .portal-prev {
-      left: 20px;
-      top: 440px;
-      background: rgba(0, 150, 255, 0.2);
-      border: 3px solid #0096ff;
-      color: #0096ff;
-    }
-    .portal-next {
-      right: 20px;
-      top: 440px;
-      background: rgba(255, 0, 150, 0.2);
-      border: 3px solid #ff0096;
-      color: #ff0096;
-    }
-    @keyframes pulse {
-      0% { transform: scale(0.98); opacity: 0.8; }
-      100% { transform: scale(1.05); opacity: 1; }
-    }
-
-    /* 맵 중앙 스폰 구역 UI */
-    #spawn-zone {
-      position: absolute;
-      left: 800px;
-      top: 500px;
-      width: 160px;
-      height: 160px;
-      transform: translate(-50%, -50%);
-      border: 3px dashed #00ff88;
-      border-radius: 50%;
-      background: rgba(0, 255, 136, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #00ff88;
-      font-weight: bold;
-      font-size: 13px;
-      text-shadow: 0 0 6px #000;
+      justify-content: flex-end;
+      transform: translateX(-20px);
+      transition: left 0.05s linear, top 0.05s linear;
       pointer-events: none;
-      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
     }
 
-    /* 필드 적 심볼 */
-    .enemy-symbol {
-      position: absolute;
-      width: 70px;
-      height: 70px;
-      background: rgba(255, 50, 50, 0.2);
-      border: 2px solid #ff3232;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    #player-nametag {
       font-size: 12px;
       font-weight: bold;
-      color: #fff;
-      box-shadow: 0 0 12px rgba(255, 50, 50, 0.6);
-      transition: transform 0.2s;
-    }
-    .enemy-symbol .icon { font-size: 24px; }
-
-    /* 플레이어 캐릭터 */
-    #player-symbol {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      transform: translate(-25px, -25px);
-      z-index: 10;
-      pointer-events: none;
-    }
-    #player-body {
-      width: 100%;
-      height: 100%;
-      background: #00ff88;
-      border: 3px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 15px #00ff88;
-      transition: background-color 0.2s, box-shadow 0.2s;
-    }
-    /* 스폰 무적 상태 표현 */
-    #player-symbol.invincible #player-body {
-      background: #00e1ff;
-      border-color: #fff;
-      box-shadow: 0 0 25px #00e1ff, 0 0 10px #fff;
-      animation: shield-blink 0.3s infinite alternate;
-    }
-    @keyframes shield-blink {
-      0% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-
-    #player-tag {
-      position: absolute;
-      top: -24px;
-      left: 50%;
-      transform: translateX(-50%);
+      color: #00ff88;
+      text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
       white-space: nowrap;
-      font-size: 12px;
-      font-weight: bold;
-      color: #00ff88;
-      text-shadow: 0 0 4px #000, 1px 1px 2px #000;
+      margin-bottom: 3px;
     }
 
-    /* 필드 상단 맵 정보 바 */
-    #map-info-bar {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.75);
-      border: 2px solid #555;
-      border-radius: 20px;
-      padding: 6px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffea00;
-      z-index: 20;
-      letter-spacing: 1px;
+    #player {
+      width: 44px;
+      height: 44px;
+      background-color: #4facfe;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #4facfe;
     }
 
-    /* 필드 하단 컨트롤 바 */
-    #field-bottom-bar {
+    #field-ui {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 130px;
-      background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6));
-      border-top: 1px solid #444;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      height: 180px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
-      z-index: 20;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #555;
+      border-radius: 10px;
+      padding: 15px;
     }
 
-    /* 가상 패드 */
     #dpad {
-      width: 110px;
-      height: 110px;
+      width: 140px;
+      height: 140px;
       position: relative;
     }
     .pad-btn {
       position: absolute;
-      width: 36px;
-      height: 36px;
-      background: #222;
+      width: 44px;
+      height: 44px;
+      background: #333;
       color: #fff;
-      border: 2px solid #666;
-      border-radius: 6px;
+      border: 2px solid #777;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
     }
-    .pad-btn:active { background: #555; }
-    #pad-w { top: 0; left: 37px; }
-    #pad-a { top: 37px; left: 0; }
-    #pad-s { top: 74px; left: 37px; }
-    #pad-d { top: 37px; left: 74px; }
+    .pad-btn:active { background: #666; }
+    #btn-w { top: 0; left: 48px; }
+    #btn-a { top: 48px; left: 0; }
+    #btn-s { top: 96px; left: 48px; }
+    #btn-d { top: 48px; left: 96px; }
 
-    /* 하단 탭 버튼들 */
-    .field-menu-btns {
-      display: flex;
-      gap: 12px;
-    }
-    .field-menu-btns .btn {
-      padding: 12px 18px;
-      font-size: 14px;
-      background: rgba(30,30,30,0.9);
-    }
-
-    /* 3. 스탯 / 스킬 / 변이 / 정보 UI (상단 팝업 모달) */
-    #popup-modal {
-      position: absolute;
-      top: -450px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 580px;
-      height: 380px;
-      background: rgba(18, 18, 18, 0.96);
-      border: 2px solid #00ff88;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,136,0.2);
-      z-index: 100;
-      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      display: flex;
-      flex-direction: column;
-      padding: 15px;
-    }
-    #popup-modal.active {
-      top: 20px;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #444;
-      padding-bottom: 10px;
-    }
-    .modal-tabs {
-      display: flex;
-      gap: 8px;
-    }
-    .tab-btn {
-      padding: 6px 14px;
-      font-size: 13px;
+    #info-panel {
+      flex: 1;
+      max-width: 450px;
+      margin-left: 20px;
+      height: 140px;
       background: #111;
-      border: 1px solid #555;
-      color: #aaa;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .tab-btn.active {
-      background: #00ff88;
-      color: #000;
-      font-weight: bold;
-      border-color: #00ff88;
-    }
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: #ff4444;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .modal-body {
-      flex: 1;
-      padding: 15px 5px;
-      text-align: left;
-      overflow-y: auto;
-    }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* 스탯 탭 스타일 */
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      background: #222;
-      padding: 10px 15px;
+      border: 2px solid #555;
       border-radius: 8px;
-      border: 1px solid #333;
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
     }
-    .stat-info { display: flex; flex-direction: column; }
-    .stat-name { font-weight: bold; font-size: 15px; color: #fff; }
-    .stat-desc { font-size: 12px; color: #888; margin-top: 2px; }
-    .stat-controls { display: flex; align-items: center; gap: 12px; }
-    .stat-val { font-size: 16px; font-weight: bold; color: #00ff88; min-width: 40px; text-align: right; }
-    .btn-stat-add {
-      width: 30px;
-      height: 30px;
-      font-size: 18px;
-      line-height: 1;
-      padding: 0;
+    .info-row { display: flex; justify-content: space-between; align-items: center; }
+    .exp-bg {
+      width: 100%;
+      height: 12px;
+      background: #333;
+      border: 1px solid #777;
+      margin-top: 4px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    #exp-fill {
+      height: 100%;
+      width: 0%;
+      background: #00ff88;
+      transition: width 0.3s ease;
     }
 
-    /* 4. 전투 로직 및 액션 시스템 */
+    /* ================= 4. 전투 화면 ================= */
     #battle-screen {
-      width: 100%;
-      height: 100%;
-      background: #0a0a0c;
       display: none;
-      flex-direction: column;
-      padding: 15px;
-      position: relative;
+      width: 100%;
     }
-    #battle-board {
-      flex: 1;
-      background: radial-gradient(circle, #1a1e29 0%, #050508 100%);
-      border: 3px solid #444;
-      border-radius: 10px;
+
+    #game-board {
+      width: 100%;
+      height: 380px;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      background-color: #000;
       position: relative;
       overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
     }
-    /* 크리티컬 황금색 글로우 효과 */
-    #battle-board.crit-glow {
+
+    #game-board.crit-glow {
       border-color: #ffea00 !important;
-      box-shadow: 0 0 35px #ffea00, inset 0 0 25px #ffea00 !important;
-      animation: flash-gold 0.4s ease-out;
+      box-shadow: 0 0 30px #ffea00, inset 0 0 20px #ffea00 !important;
+      animation: flash-border 0.5s ease-out;
     }
-    @keyframes flash-gold {
-      0% { background: #3d3500; }
-      100% { background: radial-gradient(circle, #1a1e29 0%, #050508 100%); }
+    @keyframes flash-border {
+      0% { background-color: #332b00; }
+      100% { background-color: #000; }
     }
+
     .shake { animation: shake-anim 0.35s ease-in-out; }
     @keyframes shake-anim {
-      0%, 100% { transform: translate(0, 0); }
+      0% { transform: translate(0, 0); }
       20% { transform: translate(-8px, 5px); }
       40% { transform: translate(8px, -5px); }
       60% { transform: translate(-5px, 3px); }
       80% { transform: translate(5px, -3px); }
+      100% { transform: translate(0, 0); }
     }
 
-    /* 전투 체력바 & 캐릭터 */
-    .battle-status {
+    .status-bar {
       position: absolute;
-      top: 15px;
+      top: 20px;
       font-weight: bold;
-      font-size: 14px;
-      z-index: 5;
+      font-size: clamp(13px, 2vw, 16px);
+      text-align: left;
     }
-    #hero-status { left: 15px; text-align: left; color: #00ff88; }
-    #enemy-status { right: 15px; text-align: right; color: #ff4444; }
-    .hp-bar-bg {
-      width: 180px;
-      height: 14px;
-      background: #222;
-      border: 1px solid #666;
-      border-radius: 7px;
+    #hero-status { left: 25px; color: #4facfe; }
+    #blob-status { right: 25px; text-align: right; color: #ff0844; }
+
+    .hp-bg {
+      width: clamp(120px, 20vw, 200px);
+      height: 16px;
+      background: #444;
+      border: 1px solid #fff;
+      margin-top: 5px;
+      border-radius: 4px;
       overflow: hidden;
-      margin-top: 4px;
     }
-    .hp-bar-fill {
-      height: 100%;
-      width: 100%;
-      transition: width 0.25s ease;
-    }
-    #hero-hp-fill { background: #00ff88; }
-    #enemy-hp-fill { background: #ff4444; }
+    .hp-fill { height: 100%; width: 100%; transition: width 0.3s ease; }
+    #hero-hp-fill { background: #4facfe; }
+    #blob-hp-fill { background: #ff0844; }
 
-    .battle-char {
-      position: absolute;
-      top: 130px;
-      font-size: 70px;
-    }
-    #battle-hero { left: 12%; }
-    #battle-enemy { right: 12%; }
+    .character { position: absolute; top: 140px; font-size: clamp(50px, 8vw, 80px); }
+    #hero { left: 10%; }
+    #blob { right: 10%; }
 
-    /* 연타 터치 박스 및 단계별 테두리 색상 */
     #touch-box {
       position: absolute;
-      top: 125px;
+      top: 150px;
       left: 50%;
       transform: translateX(-50%);
-      width: 140px;
-      height: 90px;
-      background: rgba(10, 10, 10, 0.85);
+      width: 120px;
+      height: 80px;
+      background-color: #1a1a1a;
       border: 3px solid #555;
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -512,22 +378,20 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.8);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    #touch-box .t-title { font-size: 10px; color: #888; letter-spacing: 0.5px; }
-    #touch-box .t-count { font-size: 32px; font-weight: bold; color: #fff; }
-    
-    /* 연타 단계 색상 (노랑 ➔ 주황 ➔ 빨강 ➔ 하양) */
+    #touch-box .box-title { font-size: 11px; color: #aaa; margin-bottom: 2px; }
+    #touch-box .box-count { font-size: 30px; font-weight: bold; color: #fff; }
+
     #touch-box.tier-yellow { border-color: #ffea00 !important; box-shadow: 0 0 15px #ffea00; }
     #touch-box.tier-orange { border-color: #ff8800 !important; box-shadow: 0 0 18px #ff8800; }
-    #touch-box.tier-red { border-color: #ff2222 !important; box-shadow: 0 0 22px #ff2222; }
-    #touch-box.tier-white { border-color: #ffffff !important; box-shadow: 0 0 28px #ffffff; }
+    #touch-box.tier-red { border-color: #ff2222 !important; box-shadow: 0 0 20px #ff2222; }
+    #touch-box.tier-white { border-color: #ffffff !important; box-shadow: 0 0 25px #ffffff; }
 
-    /* 연출: 슬래시 및 데미지 플로팅 */
     .slash-effect {
       position: absolute;
-      top: 110px;
-      right: 12%;
-      width: 100px;
-      height: 100px;
+      top: 120px;
+      right: 10%;
+      width: 120px;
+      height: 120px;
       pointer-events: none;
       display: none;
     }
@@ -539,7 +403,7 @@
       top: 50%;
       left: -20%;
       transform: rotate(-45deg) scaleX(0);
-      box-shadow: 0 0 12px #ffea00;
+      box-shadow: 0 0 10px #ffea00, 0 0 20px #fff;
     }
     .slash-active .slash-line { animation: slash-anim 0.25s ease-out forwards; }
     @keyframes slash-anim {
@@ -548,461 +412,279 @@
       100% { transform: rotate(-45deg) scaleX(1.5); opacity: 0; }
     }
 
-    .floating-dmg {
+    .floating-damage {
       position: absolute;
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 900;
       color: #ff3333;
       text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
       pointer-events: none;
       animation: float-up 0.8s ease-out forwards;
-      z-index: 20;
+      z-index: 10;
     }
-    .floating-dmg.crit { color: #ffea00 !important; font-size: 40px !important; }
-    .floating-dmg.counter { color: #00e1ff !important; font-size: 36px !important; }
+    .floating-damage.crit { color: #ffea00 !important; font-size: 42px !important; }
     @keyframes float-up {
       0% { opacity: 0; transform: translateY(0) scale(0.5); }
-      30% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+      30% { opacity: 1; transform: translateY(-20px) scale(1.3); }
       100% { opacity: 0; transform: translateY(-50px) scale(1); }
     }
 
-    /* 메시지 박스 및 액션 버튼 바 */
-    #battle-msg {
-      height: 42px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 6px;
-      margin: 10px 0;
+    #msg-box {
+      height: 50px;
+      font-weight: bold;
+      color: #ffff00;
+      margin: 15px 0;
+      font-size: clamp(14px, 2vw, 17px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      color: #ffea00;
-      font-size: 15px;
+      padding: 0 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
     }
-    #battle-actions {
+
+    #ui-container {
+      width: 100%;
       display: flex;
       gap: 10px;
+      justify-content: space-between;
     }
-    #battle-actions .btn {
+    .btn {
       flex: 1;
-      padding: 14px 0;
-      font-size: 14px;
+      padding: 16px 0;
+      font-size: clamp(12px, 1.8vw, 15px);
+      font-weight: bold;
+      font-family: inherit;
+      border: 2px solid #fff;
+      background-color: #000;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
     }
+    .btn:active:not(:disabled) { background-color: #fff; color: #000; }
+    .btn:disabled { border-color: #555; color: #555; cursor: not-allowed; }
     #btn-run { border-color: #ff8800; color: #ff8800; }
-    #btn-run:hover:not(:disabled) { background: #ff8800; color: #000; }
+    #btn-run:active:not(:disabled) { background-color: #ff8800; color: #000; }
   </style>
 </head>
 <body>
 
   <div id="game-container">
 
-    <!-- 1. 계정 (로그인 / 회원가입) 화면 -->
-    <div id="auth-screen">
-      <div class="auth-card">
-        <div class="auth-title">⚔️ 모험의 시작</div>
-        <input type="text" id="auth-id" class="auth-input" placeholder="아이디(닉네임)" maxlength="10">
-        <input type="password" id="auth-pw" class="auth-input" placeholder="비밀번호">
-        <div class="auth-btn-group">
-          <button class="btn" onclick="handleLogin()">로그인</button>
-          <button class="btn" onclick="handleRegister()">회원가입</button>
-        </div>
+    <!-- ================= 1. 타이틀 화면 ================= -->
+    <div id="title-screen" onclick="goToNameScreen()">
+      <div class="title-a">턴제형 미니게임</div>
+      <div class="title-b">아무곳이나 클릭해 게임을 시작하세요</div>
+      <div class="title-c">제작자: 제미나이, 시온</div>
+    </div>
+
+    <!-- ================= 2. 닉네임 입력 화면 ================= -->
+    <div id="name-screen">
+      <div class="name-aa">닉네임을 입력해 주세요</div>
+      <div class="name-input-group">
+        <input type="text" id="nickname-input" class="name-bb" value="" placeholder="닉네임 입력" maxlength="8" onclick="event.stopPropagation()">
+        <button class="name-cc" onclick="startGameWithNickname(event)">ENTER</button>
       </div>
     </div>
 
-    <!-- 2. 필드 및 카메라 뷰포트 화면 -->
+    <!-- ================= 3. 필드 화면 ================= -->
     <div id="field-screen">
-      <div id="map-info-bar">📍 <span id="map-title">1단계: 쉬움</span> (제한 Lv.<span id="map-req-lv">1</span>)</div>
-
-      <!-- 1600x1000 월드 맵 -->
-      <div id="world-map">
-        <!-- 포탈 -->
-        <div id="portal-prev" class="portal portal-prev">◀ 이전 맵</div>
-        <div id="portal-next" class="portal portal-next">다음 맵 ▶</div>
-
-        <!-- 맵 중앙 스폰 구역 -->
-        <div id="spawn-zone">🛡️ 중앙 안전지대</div>
-
-        <!-- 필드 적 심볼 (4마리) -->
-        <div id="enemy-0" class="enemy-symbol"><span class="icon">👾</span><span class="e-name">적1</span></div>
-        <div id="enemy-1" class="enemy-symbol"><span class="icon">👾</span><span class="e-name">적2</span></div>
-        <div id="enemy-2" class="enemy-symbol"><span class="icon">👾</span><span class="e-name">적3</span></div>
-        <div id="enemy-3" class="enemy-symbol"><span class="icon">👾</span><span class="e-name">적4</span></div>
-
-        <!-- 플레이어 캐릭터 -->
-        <div id="player-symbol">
-          <div id="player-tag">플레이어 (Lv.1)</div>
-          <div id="player-body"></div>
-        </div>
+      <div class="enemy-node" style="top: 30px; left: 5%;">
+        <span class="icon">🟢</span>
+        쉬움 (Lv.5)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 29%;">
+        <span class="icon">🟡</span>
+        보통 (Lv.15)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 53%;">
+        <span class="icon">🟠</span>
+        어려움 (Lv.30)
+      </div>
+      <div class="enemy-node" style="top: 30px; left: 77%;">
+        <span class="icon">🔴</span>
+        도전 (Lv.40)
       </div>
 
-      <!-- 필드 하단 컨트롤 바 -->
-      <div id="field-bottom-bar">
+      <div id="player-container">
+        <div id="player-nametag">- (Lv.1)</div>
+        <div id="player"></div>
+      </div>
+
+      <div id="field-ui">
         <div id="dpad">
-          <div id="pad-w" class="pad-btn">W</div>
-          <div id="pad-a" class="pad-btn">A</div>
-          <div id="pad-s" class="pad-btn">S</div>
-          <div id="pad-d" class="pad-btn">D</div>
+          <button id="btn-w" class="pad-btn">W</button>
+          <button id="btn-a" class="pad-btn">A</button>
+          <button id="btn-s" class="pad-btn">S</button>
+          <button id="btn-d" class="pad-btn">D</button>
         </div>
 
-        <div class="field-menu-btns">
-          <button class="btn" onclick="openPopup('stat')">📊 스탯</button>
-          <button class="btn" onclick="openPopup('skill')">⚡ 스킬</button>
-          <button class="btn" onclick="openPopup('mutation')">🧬 변이</button>
-          <button class="btn" onclick="openPopup('info')">ℹ️ 정보</button>
-          <button class="btn" style="border-color:#ff4444; color:#ff4444;" onclick="handleLogout()">🚪 로그아웃</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. 상단 팝업 모달 UI -->
-    <div id="popup-modal">
-      <div class="modal-header">
-        <div class="modal-tabs">
-          <button id="tab-btn-stat" class="tab-btn" onclick="switchTab('stat')">스탯</button>
-          <button id="tab-btn-skill" class="tab-btn" onclick="switchTab('skill')">스킬</button>
-          <button id="tab-btn-mutation" class="tab-btn" onclick="switchTab('mutation')">변이</button>
-          <button id="tab-btn-info" class="tab-btn" onclick="switchTab('info')">정보</button>
-        </div>
-        <button class="modal-close" onclick="closePopup()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- 스탯 탭 -->
-        <div id="tab-stat" class="tab-content">
-          <div style="margin-bottom:12px; font-weight:bold; color:#ffea00;">
-            잔여 스탯 포인트: <span id="stat-points">0</span>
+        <div id="info-panel">
+          <div class="info-row">
+            <span><b>이름:</b> <span id="info-name">-</span></span>
+            <span><b>Lv.</b> <span id="info-level">1</span></span>
           </div>
-          <div class="stat-row">
-            <div class="stat-info">
-              <span class="stat-name">⚔️ 공격력</span>
-              <span class="stat-desc">연타 데미지 계수를 높여줍니다.</span>
-            </div>
-            <div class="stat-controls">
-              <span id="stat-atk-val" class="stat-val">0</span>
-              <button class="btn btn-stat-add" onclick="addStat('atk')">+</button>
-            </div>
+          <div class="info-row">
+            <span><b>체력:</b> <span id="info-hp">100</span>/<span id="info-max-hp">100</span></span>
           </div>
-          <div class="stat-row">
-            <div class="stat-info">
-              <span class="stat-name">❤️ 최대 체력</span>
-              <span class="stat-desc">캐릭터의 최대 HP가 상승합니다. (+20)</span>
-            </div>
-            <div class="stat-controls">
-              <span id="stat-hp-val" class="stat-val">0</span>
-              <button class="btn btn-stat-add" onclick="addStat('hp')">+</button>
-            </div>
+          <div class="info-row">
+            <span><b>터치당 뎀:</b> <span id="info-dmg">0.20</span></span>
           </div>
-          <div class="stat-row">
-            <div class="stat-info">
-              <span class="stat-name">💨 회피율</span>
-              <span class="stat-desc">전투 시 기본 회피 성공률 보너스를 제공합니다.</span>
-            </div>
-            <div class="stat-controls">
-              <span id="stat-dodge-val" class="stat-val">0</span>
-              <button class="btn btn-stat-add" onclick="addStat('dodge')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 스킬 탭 -->
-        <div id="tab-skill" class="tab-content">
-          <div style="text-align:center; padding:40px 0; color:#888;">
-            🔒 스킬 시스템 준비 중입니다.<br>(향후 업데이트 해금 예정)
-          </div>
-        </div>
-
-        <!-- 변이 탭 -->
-        <div id="tab-mutation" class="tab-content">
-          <div style="text-align:center; padding:30px 10px;">
-            <div style="font-size:18px; font-weight:bold; color:#ff0096; margin-bottom:10px;">🧬 신체 변이 시스템</div>
-            <div id="mutation-status-text" style="color:#aaa; font-size:14px; line-height:1.6;">
-              Lv.15 달성 시 강력한 변이 능력이 해금됩니다.<br>
-              현재 레벨: <span id="mutation-curr-lv" style="color:#00ff88; font-weight:bold;">1</span> / 15
-            </div>
-          </div>
-        </div>
-
-        <!-- 정보 탭 -->
-        <div id="tab-info" class="tab-content">
-          <div style="line-height:2; font-size:15px; padding:10px;">
-            <div>👤 <b>닉네임:</b> <span id="info-id">-</span></div>
-            <div>⭐ <b>레벨:</b> Lv.<span id="info-lv">1</span></div>
-            <div>📈 <b>경험치:</b> <span id="info-exp">0</span> / <span id="info-max-exp">100</span></div>
-            <div>❤️ <b>체력:</b> <span id="info-hp-text">100 / 100</span></div>
-            <div>⚔️ <b>공격력 계수:</b> <span id="info-atk-text">1.0</span></div>
-            <div>💨 <b>회피 보너스:</b> <span id="info-dodge-text">+0%</span></div>
+          <div>
+            <b>경험치:</b> <span id="info-exp">0</span> / <span id="info-max-exp">100</span>
+            <div class="exp-bg"><div id="exp-fill"></div></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 4. 전투 화면 -->
+    <!-- ================= 4. 전투 화면 ================= -->
     <div id="battle-screen">
-      <div id="battle-board">
-        <div id="hero-status" class="battle-status">
-          <span id="b-hero-name">플레이어</span> (Lv.<span id="b-hero-lv">1</span>)<br>
-          <div class="hp-bar-bg"><div id="hero-hp-fill" class="hp-bar-fill"></div></div>
-          HP: <span id="b-hero-hp">100</span>/<span id="b-hero-max-hp">100</span>
+      <div id="game-board">
+        <div id="hero-status" class="status-bar">
+          <span id="battle-hero-name">-</span> (Lv.<span id="battle-hero-lv">1</span>)<br>
+          <div class="hp-bg"><div id="hero-hp-fill" class="hp-fill"></div></div>
+          HP: <span id="hero-hp">100.0</span>/<span id="hero-max-hp">100</span>
+        </div>
+        
+        <div id="blob-status" class="status-bar">
+          <span id="blob-name">BLOB</span><br>
+          <div class="hp-bg"><div id="blob-hp-fill" class="hp-fill"></div></div>
+          HP: <span id="blob-hp">250.0</span>/<span id="blob-max-hp">250</span>
         </div>
 
-        <div id="enemy-status" class="battle-status">
-          <span id="b-enemy-name">슬라임</span> (Lv.<span id="b-enemy-lv">1</span>)<br>
-          <div class="hp-bar-bg"><div id="enemy-hp-fill" class="hp-bar-fill"></div></div>
-          HP: <span id="b-enemy-hp">100</span>/<span id="b-enemy-max-hp">100</span>
-        </div>
-
-        <div id="battle-hero" class="battle-char">⚔️</div>
-
+        <div id="hero" class="character">⚔️</div>
+        
         <div id="touch-box">
-          <div class="t-title">KEY / TAP COUNT</div>
-          <div id="touch-count" class="t-count">0</div>
+          <div class="box-title">TAP COUNT</div>
+          <div id="touch-count-text" class="box-count">0</div>
         </div>
 
-        <div id="battle-enemy" class="battle-char">👾</div>
+        <div id="blob" class="character">👾</div>
 
         <div id="slash-effect" class="slash-effect">
           <div class="slash-line"></div>
         </div>
       </div>
 
-      <div id="battle-msg">전투 시작! 행동을 선택하세요.</div>
+      <div id="msg-box">당신의 턴입니다! [1]~[4] 키 또는 버튼을 누르세요.</div>
 
-      <div id="battle-actions">
-        <button id="btn-atk" class="btn" onclick="handleAttackAction()">⚔️ 공격 (5초)</button>
-        <button id="btn-counter" class="btn" onclick="handleCounterAction()">⚡ 반격</button>
-        <button id="btn-dodge" class="btn" onclick="handleDodgeAction()">💨 회피 (5초)</button>
-        <button id="btn-run" class="btn" onclick="handleRunAction()">🏃 후퇴</button>
+      <div id="ui-container">
+        <button id="btn-attack" class="btn" onclick="handleAttack(event)">⚔️ ATTACK<br>[1] 공격</button>
+        <button id="btn-counter" class="btn" onclick="handleCounter(event)">⚡ COUNTER<br>[2] 반격</button>
+        <button id="btn-dodge" class="btn" onclick="handleDodge(event)">💨 DODGE<br>[3] 회피</button>
+        <button id="btn-run" class="btn" onclick="handleRun(event)">🏃 RUN<br>[4] 후퇴</button>
       </div>
     </div>
-
   </div>
 
   <script>
-    /* ===================================================
-       1. 데이터 저장 및 계정 시스템 (Auto-Save)
-    =================================================== */
-    let currentUser = null;
-    let playerData = {
-      id: '',
-      pw: '',
-      level: 1,
-      exp: 0,
-      maxExp: 100,
-      statPoints: 0,
-      stats: { atk: 0, hp: 0, dodge: 0 },
-      currentMapIdx: 0,
-      x: 800,
-      y: 500
-    };
+    // ================= [플레이어 데이터 & 닉네임] =================
+    let playerName = "";
+    let playerLv = 1;
+    let playerExp = 0;
+    let playerMaxExp = 100;
+    let playerMaxHp = 100;
+    let heroHp = 100.0;
+    let touchDmgMult = 0.20;
 
-    let isInvincible = false;
-    let invincibleTimer = null;
-
-    function autoSave() {
-      if (!currentUser) return;
-      localStorage.setItem('rpg_user_' + currentUser, JSON.stringify(playerData));
+    function goToNameScreen() {
+      document.getElementById("title-screen").style.display = "none";
+      document.getElementById("name-screen").style.display = "flex";
+      setTimeout(() => document.getElementById("nickname-input").focus(), 100);
     }
 
-    function handleLogin() {
-      const id = document.getElementById('auth-id').value.trim();
-      const pw = document.getElementById('auth-pw').value.trim();
-      if (!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
-
-      const saved = localStorage.getItem('rpg_user_' + id);
-      if (!saved) return alert("존재하지 않는 계정입니다. 회원가입을 먼저 진행하세요.");
-
-      const parsed = JSON.parse(saved);
-      if (parsed.pw !== pw) return alert("비밀번호가 일치하지 않습니다.");
-
-      currentUser = id;
-      playerData = parsed;
-      startGame();
-    }
-
-    function handleRegister() {
-      const id = document.getElementById('auth-id').value.trim();
-      const pw = document.getElementById('auth-pw').value.trim();
-      if (!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
-
-      if (localStorage.getItem('rpg_user_' + id)) {
-        return alert("이미 존재하는 아이디입니다.");
-      }
-
-      currentUser = id;
-      playerData = {
-        id: id,
-        pw: pw,
-        level: 1,
-        exp: 0,
-        maxExp: 100,
-        statPoints: 0,
-        stats: { atk: 0, hp: 0, dodge: 0 },
-        currentMapIdx: 0,
-        x: 800,
-        y: 500
-      };
-      autoSave();
-      alert("회원가입이 완료되었습니다!");
-      startGame();
-    }
-
-    function handleLogout() {
-      autoSave();
-      currentUser = null;
-      document.getElementById('field-screen').style.display = 'none';
-      document.getElementById('auth-screen').style.display = 'flex';
-      closePopup();
-    }
-
-    function startGame() {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('field-screen').style.display = 'block';
-      isFieldMode = true;
-      loadMap(playerData.currentMapIdx);
-      updatePopupUI();
-      requestAnimationFrame(gameLoop);
-    }
-
-    /* ===================================================
-       2. 맵 및 카메라 뷰포트 시스템 & 스폰 시스템
-    =================================================== */
-    const MAPS = [
-      { name: "1단계: 쉬움", reqLv: 1, enemyBaseLv: 1, color: "#181c24" },
-      { name: "2단계: 보통", reqLv: 1, enemyBaseLv: 10, color: "#1c2418" },
-      { name: "3단계: 어려움", reqLv: 1, enemyBaseLv: 20, color: "#241e18" },
-      { name: "4단계: 도전", reqLv: 1, enemyBaseLv: 30, color: "#241823" },
-      { name: "5단계: 최종", reqLv: 40, enemyBaseLv: 45, color: "#2d0d0d" }
-    ];
-
-    let isFieldMode = false;
-    const keys = { w: false, a: false, s: false, d: false };
-    let enemySymbols = [];
-
-    function loadMap(mapIdx) {
-      playerData.currentMapIdx = mapIdx;
-      const map = MAPS[mapIdx];
-      document.getElementById('map-title').innerText = map.name;
-      document.getElementById('map-req-lv').innerText = map.reqLv;
-      document.getElementById('world-map').style.backgroundColor = map.color;
-
-      // 포탈 시각 처리
-      document.getElementById('portal-prev').style.display = mapIdx === 0 ? 'none' : 'flex';
-      document.getElementById('portal-next').style.display = mapIdx === MAPS.length - 1 ? 'none' : 'flex';
-
-      // 적 심볼 위치 배치 (스폰 구역인 800, 500 주변을 피해서 배치)
-      enemySymbols = [
-        { id: 0, x: 350, y: 250, name: `적 (Lv.${map.enemyBaseLv})`, baseLv: map.enemyBaseLv, alive: true },
-        { id: 1, x: 1250, y: 250, name: `적 (Lv.${map.enemyBaseLv + 2})`, baseLv: map.enemyBaseLv + 2, alive: true },
-        { id: 2, x: 350, y: 750, name: `적 (Lv.${map.enemyBaseLv + 4})`, baseLv: map.enemyBaseLv + 4, alive: true },
-        { id: 3, x: 1250, y: 750, name: `적 (Lv.${map.enemyBaseLv + 6})`, baseLv: map.enemyBaseLv + 6, alive: true }
-      ];
-
-      enemySymbols.forEach(e => {
-        const el = document.getElementById(`enemy-${e.id}`);
-        el.style.left = `${e.x - 35}px`;
-        el.style.top = `${e.y - 35}px`;
-        el.querySelector('.e-name').innerText = e.name;
-        el.style.display = 'flex';
-      });
-
-      autoSave();
-    }
-
-    // [수정] 중앙 스폰 지점 이동 및 3초간 무적 보호
-    function respawnAtCenter() {
-      playerData.x = 800; // 맵 중앙 X
-      playerData.y = 500; // 맵 중앙 Y
-      triggerInvincible(3000); // 3초 무적
-    }
-
-    function triggerInvincible(durationMs) {
-      isInvincible = true;
-      const pEl = document.getElementById('player-symbol');
-      pEl.classList.add('invincible');
-
-      if (invincibleTimer) clearTimeout(invincibleTimer);
-      invincibleTimer = setTimeout(() => {
-        isInvincible = false;
-        pEl.classList.remove('invincible');
-      }, durationMs);
-    }
-
-    // 이동 처리 및 카메라 추적
-    function updateMovement() {
-      if (!isFieldMode) return;
-
-      const speed = 6;
-      if (keys.w) playerData.y = Math.max(30, playerData.y - speed);
-      if (keys.s) playerData.y = Math.min(970, playerData.y + speed);
-      if (keys.a) playerData.x = Math.max(30, playerData.x - speed);
-      if (keys.d) playerData.x = Math.min(1570, playerData.x + speed);
-
-      // 플레이어 엘리먼트 위치 update
-      const pEl = document.getElementById('player-symbol');
-      pEl.style.left = `${playerData.x}px`;
-      pEl.style.top = `${playerData.y}px`;
-      document.getElementById('player-tag').innerText = `${currentUser} (Lv.${playerData.level})${isInvincible ? ' [무적]' : ''}`;
-
-      // 카메라 추적 (카메라 뷰포트 850x620)
-      const camX = Math.max(0, Math.min(1600 - 850, playerData.x - 425));
-      const camY = Math.max(0, Math.min(1000 - 620, playerData.y - 310));
-      document.getElementById('world-map').style.transform = `translate(${-camX}px, ${-camY}px)`;
-
-      checkPortalCollision();
-      checkEnemyCollision();
-    }
-
-    function checkPortalCollision() {
-      // 좌측 포탈 (이전 맵)
-      if (playerData.currentMapIdx > 0 && playerData.x < 80 && Math.abs(playerData.y - 500) < 80) {
-        playerData.x = 1500;
-        loadMap(playerData.currentMapIdx - 1);
-      }
-      // 우측 포탈 (다음 맵)
-      if (playerData.currentMapIdx < MAPS.length - 1 && playerData.x > 1520 && Math.abs(playerData.y - 500) < 80) {
-        const nextMap = MAPS[playerData.currentMapIdx + 1];
-        if (playerData.level < nextMap.reqLv) {
-          alert(`🚫 레벨 제한! [${nextMap.name}]은 Lv.${nextMap.reqLv} 이상부터 입장 가능합니다.`);
-          playerData.x = 1480;
-        } else {
-          playerData.x = 100;
-          loadMap(playerData.currentMapIdx + 1);
-        }
-      }
-    }
-
-    function checkEnemyCollision() {
-      if (isInvincible) return; // 무적 상태 시 적 충돌 무시
-
-      enemySymbols.forEach(e => {
-        if (e.alive) {
-          const dist = Math.hypot(playerData.x - e.x, playerData.y - e.y);
-          if (dist < 55) {
-            startBattle(e);
-          }
-        }
-      });
-    }
-
-    /* [수정] 키보드 / 화면 연타 통합 처리 시스템 */
-    window.addEventListener('keydown', e => {
-      const k = e.key.toLowerCase();
-
-      // 전투 중 공격/회피 타이밍일 때: 모든 키보드 입력을 연타로 인정!
-      if (!isFieldMode && (isAttacking || isDodging)) {
-        touchCount++;
-        updateTouchBox();
+    function startGameWithNickname(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      
+      const inputVal = document.getElementById("nickname-input").value.trim();
+      
+      if (inputVal === "") {
+        alert("닉네임을 입력해 주세요!");
+        document.getElementById("nickname-input").focus();
         return;
       }
+      
+      playerName = inputVal;
+      
+      document.getElementById("info-name").innerText = playerName;
+      document.getElementById("battle-hero-name").innerText = playerName;
 
-      // 필드 이동 키 처리
-      if (k === 'w' || k === 'ㅈ') keys.w = true;
-      if (k === 'a' || k === 'ㅁ') keys.a = true;
-      if (k === 's' || k === 'ㄴ') keys.s = true;
-      if (k === 'd' || k === 'ㅇ') keys.d = true;
+      document.getElementById("name-screen").style.display = "none";
+      document.getElementById("field-screen").style.display = "block";
+      
+      isFieldMode = true;
+      updateInfoUI();
+      repositionEnemies();
+    }
+
+    document.getElementById("nickname-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        startGameWithNickname(e);
+      }
     });
 
-    window.addEventListener('keyup', e => {
+    // ================= [필드 & 이동 시스템] =================
+    let playerX = 0;
+    let playerY = 0;
+    const moveSpeed = 6;
+
+    let enemiesData = [
+      { id: 'easy', name: '쉬움 (Lv.5)', level: 5, hp: 120, minDmg: 3, maxDmg: 8, exp: 50, x: 0, y: 30, w: 100, h: 80 },
+      { id: 'normal', name: '보통 (Lv.15)', level: 15, hp: 250, minDmg: 5, maxDmg: 15, exp: 120, x: 0, y: 30, w: 100, h: 80 },
+      { id: 'hard', name: '어려움 (Lv.30)', level: 30, hp: 500, minDmg: 12, maxDmg: 25, exp: 300, x: 0, y: 30, w: 100, h: 80 },
+      { id: 'boss', name: '도전 (Lv.40)', level: 40, hp: 1000, minDmg: 20, maxDmg: 40, exp: 700, x: 0, y: 30, w: 100, h: 80 }
+    ];
+
+    function repositionEnemies() {
+      const field = document.getElementById("field-screen");
+      const fw = field.clientWidth;
+      const nodes = document.querySelectorAll(".enemy-node");
+      
+      enemiesData[0].x = fw * 0.05;
+      enemiesData[1].x = fw * 0.29;
+      enemiesData[2].x = fw * 0.53;
+      enemiesData[3].x = fw * 0.77;
+
+      nodes.forEach((node, idx) => {
+        enemiesData[idx].w = node.clientWidth;
+        enemiesData[idx].h = node.clientHeight;
+      });
+
+      playerX = fw / 2 - 20;
+      playerY = 240;
+    }
+
+    window.addEventListener("resize", () => {
+      if (isFieldMode) repositionEnemies();
+    });
+
+    let currentEnemy = null;
+    let isFieldMode = false;
+
+    const keys = { w: false, a: false, s: false, d: false };
+
+    window.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase();
+      if (isFieldMode) {
+        if (k === 'w' || k === 'ㅈ') keys.w = true;
+        if (k === 'a' || k === 'ㅁ') keys.a = true;
+        if (k === 's' || k === 'ㄴ') keys.s = true;
+        if (k === 'd' || k === 'ㅇ') keys.d = true;
+      } else if (document.getElementById("battle-screen").style.display === "block") {
+        if (isCooltime) return;
+        if (isAttackingMode || isDodgeMode) {
+          registerInput();
+          return;
+        }
+        if (e.key === "1") handleAttack(e);
+        else if (e.key === "2") handleCounter(e);
+        else if (e.key === "3" && !dodgeDisabledTurn) handleDodge(e);
+        else if (e.key === "4") handleRun(e);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
       const k = e.key.toLowerCase();
       if (k === 'w' || k === 'ㅈ') keys.w = false;
       if (k === 'a' || k === 'ㅁ') keys.a = false;
@@ -1010,383 +692,398 @@
       if (k === 'd' || k === 'ㅇ') keys.d = false;
     });
 
-    function bindPad(id, key) {
-      const el = document.getElementById(id);
-      el.addEventListener('pointerdown', (e) => { e.stopPropagation(); keys[key] = true; });
-      el.addEventListener('pointerup', (e) => { e.stopPropagation(); keys[key] = false; });
-      el.addEventListener('pointerleave', (e) => { e.stopPropagation(); keys[key] = false; });
+    function bindPadBtn(id, key) {
+      const btn = document.getElementById(id);
+      btn.addEventListener("pointerdown", (e) => { e.stopPropagation(); keys[key] = true; });
+      btn.addEventListener("pointerup", (e) => { e.stopPropagation(); keys[key] = false; });
+      btn.addEventListener("pointerleave", (e) => { e.stopPropagation(); keys[key] = false; });
     }
-    bindPad('pad-w', 'w'); bindPad('pad-a', 'a'); bindPad('pad-s', 's'); bindPad('pad-d', 'd');
+    bindPadBtn("btn-w", "w");
+    bindPadBtn("btn-a", "a");
+    bindPadBtn("btn-s", "s");
+    bindPadBtn("btn-d", "d");
 
-    function gameLoop() {
-      updateMovement();
-      if (isFieldMode) requestAnimationFrame(gameLoop);
-    }
+    function fieldLoop() {
+      if (isFieldMode) {
+        const field = document.getElementById("field-screen");
+        const maxW = field.clientWidth - 40;
+        const maxH = field.clientHeight - 200;
 
-    /* ===================================================
-       3. 상단 팝업 모달 UI 및 스탯 관리
-    =================================================== */
-    function openPopup(tabName) {
-      document.getElementById('popup-modal').classList.add('active');
-      switchTab(tabName);
-    }
-    function closePopup() {
-      document.getElementById('popup-modal').classList.remove('active');
-    }
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        if (keys.w) playerY = Math.max(10, playerY - moveSpeed);
+        if (keys.s) playerY = Math.min(maxH, playerY + moveSpeed);
+        if (keys.a) playerX = Math.max(10, playerX - moveSpeed);
+        if (keys.d) playerX = Math.min(maxW, playerX + moveSpeed);
 
-      document.getElementById(`tab-btn-${tabName}`).classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      updatePopupUI();
-    }
+        const playerContainer = document.getElementById("player-container");
+        playerContainer.style.left = playerX + "px";
+        playerContainer.style.top = playerY + "px";
 
-    function addStat(type) {
-      if (playerData.statPoints <= 0) return alert("잔여 스탯 포인트가 부족합니다.");
-      playerData.statPoints--;
-      playerData.stats[type]++;
-      autoSave();
-      updatePopupUI();
-    }
-
-    function updatePopupUI() {
-      document.getElementById('stat-points').innerText = playerData.statPoints;
-      document.getElementById('stat-atk-val').innerText = playerData.stats.atk;
-      document.getElementById('stat-hp-val').innerText = playerData.stats.hp;
-      document.getElementById('stat-dodge-val').innerText = playerData.stats.dodge;
-
-      document.getElementById('mutation-curr-lv').innerText = playerData.level;
-      if (playerData.level >= 15) {
-        document.getElementById('mutation-status-text').innerHTML = "<span style='color:#00ff88; font-weight:bold;'>🎉 변이 능력 해금 완료! 신체 인자 개조 가능</span>";
+        checkEnemyCollision();
       }
+      requestAnimationFrame(fieldLoop);
+    }
+    requestAnimationFrame(fieldLoop);
 
-      const getMaxHp = () => 100 + (playerData.level - 1) * 15 + playerData.stats.hp * 20;
-      const getAtkMult = () => (1.0 + playerData.stats.atk * 0.15).toFixed(2);
-      const getDodgeBonus = () => playerData.stats.dodge * 3;
+    function checkEnemyCollision() {
+      const pRect = { x: playerX, y: playerY, w: 40, h: 40 };
+      for (let enemy of enemiesData) {
+        if (
+          pRect.x < enemy.x + enemy.w &&
+          pRect.x + pRect.w > enemy.x &&
+          pRect.y < enemy.y + enemy.h &&
+          pRect.y + pRect.h > enemy.y
+        ) {
+          startBattle(enemy);
+          break;
+        }
+      }
+    }
 
-      document.getElementById('info-id').innerText = currentUser;
-      document.getElementById('info-lv').innerText = playerData.level;
-      document.getElementById('info-exp').innerText = playerData.exp;
-      document.getElementById('info-max-exp').innerText = playerData.maxExp;
-      document.getElementById('info-hp-text').innerText = `${getMaxHp()} / ${getMaxHp()}`;
-      document.getElementById('info-atk-text').innerText = getAtkMult();
-      document.getElementById('info-dodge-text').innerText = `+${getDodgeBonus()}%`;
+    function updateInfoUI() {
+      document.getElementById("info-name").innerText = playerName;
+      document.getElementById("info-level").innerText = playerLv;
+      document.getElementById("info-hp").innerText = heroHp;
+      document.getElementById("info-max-hp").innerText = playerMaxHp;
+      document.getElementById("info-dmg").innerText = touchDmgMult.toFixed(2);
+      document.getElementById("info-exp").innerText = playerExp;
+      document.getElementById("info-max-exp").innerText = playerMaxExp;
+      document.getElementById("exp-fill").style.width = `${(playerExp / playerMaxExp) * 100}%`;
+      
+      document.getElementById("player-nametag").innerText = `${playerName} (Lv.${playerLv})`;
     }
 
     function gainExp(amount) {
-      playerData.exp += amount;
-      while (playerData.exp >= playerData.maxExp) {
-        playerData.exp -= playerData.maxExp;
-        playerData.level++;
-        playerData.statPoints += 2; // 스탯 포인트 +2
-        playerData.maxExp = Math.floor(playerData.maxExp * 1.3);
-        alert(`🎉 LEVEL UP! 레벨 ${playerData.level} 달성! (스탯 포인트 +2 획득)`);
+      playerExp += amount;
+      while (playerExp >= playerMaxExp) {
+        playerExp -= playerMaxExp;
+        playerLv++;
+        
+        touchDmgMult += 0.20;
+        playerMaxHp += 25;
+        heroHp = playerMaxHp;
+
+        if (playerLv >= 3) {
+          playerMaxExp += 50;
+        }
+        alert(`🎉 LEVEL UP! 레벨 ${playerLv} 달성!\n체력 +25 (최대 ${playerMaxHp}) | 터치당 데미지 +0.20 (총 ${touchDmgMult.toFixed(2)})`);
       }
-      autoSave();
-      updatePopupUI();
+      updateInfoUI();
     }
 
-    /* ===================================================
-       4. 전투 로직 및 액션 시스템
-    =================================================== */
-    let currentEnemy = null;
-    let bHeroHp = 100, bHeroMaxHp = 100;
-    let bEnemyHp = 100, bEnemyMaxHp = 100;
-    
-    let isAttacking = false, isDodging = false, isActionCooldown = false;
-    let touchCount = 0, battleTimer = null;
+    // ================= [전투 시스템] =================
+    let blobHp = 250.0;
+    let blobMaxHp = 250.0;
+    let stance = 'none';
+    let isAttackingMode = false;
+    let isDodgeMode = false;
+    let touchCount = 0;
+    let timer = null;
+    let isCooltime = false;
     let dodgeDisabledTurn = false;
 
     function startBattle(enemy) {
       isFieldMode = false;
       currentEnemy = enemy;
 
-      const getMaxHp = () => 100 + (playerData.level - 1) * 15 + playerData.stats.hp * 20;
-      bHeroMaxHp = getMaxHp();
-      bHeroHp = bHeroMaxHp;
+      keys.w = keys.a = keys.s = keys.d = false;
 
-      bEnemyMaxHp = enemy.baseLv * 40;
-      bEnemyHp = bEnemyMaxHp;
+      heroHp = playerMaxHp;
+      blobHp = enemy.hp;
+      blobMaxHp = enemy.hp;
 
-      document.getElementById('b-hero-name').innerText = currentUser;
-      document.getElementById('b-hero-lv').innerText = playerData.level;
-      document.getElementById('b-enemy-name').innerText = enemy.name;
-      document.getElementById('b-enemy-lv').innerText = enemy.baseLv;
+      document.getElementById("battle-hero-name").innerText = playerName;
+      document.getElementById("battle-hero-lv").innerText = playerLv;
+      document.getElementById("blob-name").innerText = enemy.name;
+      document.getElementById("hero-max-hp").innerText = playerMaxHp;
+      document.getElementById("blob-max-hp").innerText = blobMaxHp;
 
-      updateBattleHp();
+      updateHpUI();
 
-      document.getElementById('field-screen').style.display = 'none';
-      document.getElementById('battle-screen').style.display = 'flex';
+      document.getElementById("field-screen").style.display = "none";
+      document.getElementById("battle-screen").style.display = "block";
 
-      document.getElementById('battle-msg').innerText = `⚔️ ${enemy.name}과(와) 전투 시작!`;
-      setBattleBtnsDisabled(false);
+      document.getElementById("msg-box").innerText = `⚔️ ${enemy.name}과의 전투 시작! 당신의 턴입니다.`;
+      disableButtons(false);
     }
 
-    // [수정] 후퇴 및 패배 시 중앙 스폰 이동 처리
-    function exitBattle(isVictory, isRun = false) {
-      clearInterval(battleTimer);
-      isAttacking = false;
-      isDodging = false;
-      isActionCooldown = false;
+    function exitBattle(isVictory) {
+      isAttackingMode = false;
+      isDodgeMode = false;
+      isCooltime = false;
+      if (timer) clearInterval(timer);
 
-      document.getElementById('battle-screen').style.display = 'none';
-      document.getElementById('field-screen').style.display = 'block';
-
-      if (isVictory && currentEnemy) {
-        document.getElementById(`enemy-${currentEnemy.id}`).style.display = 'none';
-        currentEnemy.alive = false;
-        gainExp(currentEnemy.baseLv * 35);
-      } else if (!isVictory || isRun) {
-        // [수정] 패배 및 후퇴 시 맵 중앙 스폰 지점 이동 및 3초 무적 보호
-        respawnAtCenter();
-      }
+      document.getElementById("battle-screen").style.display = "none";
+      document.getElementById("field-screen").style.display = "block";
 
       isFieldMode = true;
-      requestAnimationFrame(gameLoop);
+      repositionEnemies();
+
+      if (isVictory && currentEnemy) {
+        gainExp(currentEnemy.exp);
+      }
+      updateInfoUI();
     }
 
-    // 마우스/터치 클릭 연타 처리
-    window.addEventListener('pointerdown', () => {
-      if (document.getElementById('battle-screen').style.display === 'flex') {
-        if (isAttacking || isDodging) {
-          touchCount++;
-          updateTouchBox();
-        }
+    function handleRun(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (isCooltime) return;
+      alert("🏃 전투에서 후퇴했습니다!");
+      exitBattle(false);
+    }
+
+    function updateTouchBox() {
+      const box = document.getElementById("touch-box");
+      const text = document.getElementById("touch-count-text");
+      text.innerText = touchCount;
+
+      box.classList.remove("tier-yellow", "tier-orange", "tier-red", "tier-white");
+
+      if (touchCount >= 130) box.classList.add("tier-white");
+      else if (touchCount >= 100) box.classList.add("tier-red");
+      else if (touchCount >= 60) box.classList.add("tier-orange");
+      else if (touchCount >= 30) box.classList.add("tier-yellow");
+    }
+
+    function registerInput() {
+      if (isAttackingMode) {
+        touchCount++;
+        updateTouchBox();
+        let critRate = (touchCount * 0.3).toFixed(1);
+        document.getElementById("msg-box").innerText = `🔥 연타! (${touchCount}회) | 크리티컬 확률: ${critRate}%`;
+      } else if (isDodgeMode) {
+        touchCount++;
+        updateTouchBox();
+        let dodgeRate = (Math.floor(touchCount / 10) * 5);
+        document.getElementById("msg-box").innerText = `💨 회피 연타! (${touchCount}회) | 회피 성공률: ${dodgeRate}%`;
+      }
+    }
+
+    window.addEventListener("pointerdown", (e) => {
+      if (!isFieldMode && document.getElementById("battle-screen").style.display === "block") {
+        registerInput();
       }
     });
 
-    function updateTouchBox() {
-      document.getElementById('touch-count').innerText = touchCount;
-      const box = document.getElementById('touch-box');
-      box.classList.remove('tier-yellow', 'tier-orange', 'tier-red', 'tier-white');
-
-      if (touchCount >= 100) box.classList.add('tier-white');
-      else if (touchCount >= 70) box.classList.add('tier-red');
-      else if (touchCount >= 40) box.classList.add('tier-orange');
-      else if (touchCount >= 20) box.classList.add('tier-yellow');
+    function handleAttack(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!isAttackingMode && !isCooltime) {
+        isAttackingMode = true;
+        touchCount = 0;
+        updateTouchBox();
+        disableButtons(true);
+        
+        let timeLeft = 5;
+        document.getElementById("msg-box").innerText = `🔥 5초간 연타하세요!`;
+        
+        timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            finishPlayerAttack();
+          }
+        }, 1000);
+      }
     }
 
-    // 공격 액션 (5초 제한, 모든 키/터치 연타)
-    function handleAttackAction() {
-      if (isActionCooldown) return;
-      isAttacking = true;
-      touchCount = 0;
-      updateTouchBox();
-      setBattleBtnsDisabled(true);
-
-      let left = 5;
-      document.getElementById('battle-msg').innerText = `🔥 5초간 키보드 아무 키나 마우스를 미친듯이 연타하세요!`;
-
-      battleTimer = setInterval(() => {
-        left--;
-        if (left <= 0) {
-          clearInterval(battleTimer);
-          finishAttackAction();
-        }
-      }, 1000);
-    }
-
-    function finishAttackAction() {
-      isAttacking = false;
-      const atkMult = 1.0 + playerData.stats.atk * 0.15;
-      let baseDmg = touchCount * 0.3 * atkMult;
-
-      // 크리티컬 확률 (연타 비례, 최대 2배 데미지)
-      let critRate = Math.min(0.8, touchCount * 0.015);
+    function finishPlayerAttack() {
+      isAttackingMode = false;
+      let baseDamage = touchCount * touchDmgMult;
+      let critRate = (touchCount * 0.3) / 100;
       let isCrit = Math.random() < critRate;
-      let finalDmg = parseFloat((isCrit ? baseDmg * 2 : baseDmg).toFixed(1));
 
-      bEnemyHp = Math.max(0, bEnemyHp - finalDmg);
+      let finalDamage = isCrit ? baseDamage * 2 : baseDamage;
+      finalDamage = parseFloat(finalDamage.toFixed(1));
 
-      triggerSlashAnimation();
+      blobHp = Math.max(0, blobHp - finalDamage).toFixed(1);
+
+      triggerSlashEffect();
+
       setTimeout(() => {
         if (isCrit) triggerCritGlow();
         triggerShake();
-        showFloatingDamage(finalDmg, 'enemy', isCrit);
-        updateBattleHp();
+        showFloatingText(finalDamage, 'blob', isCrit);
+        updateHpUI();
 
-        document.getElementById('battle-msg').innerText = `⚔️ ${touchCount}회 연타! ${finalDmg} 데미지!${isCrit ? ' 💥 [CRITICAL!]' : ''}`;
+        let critMsg = isCrit ? " 💥 [CRITICAL HIT! 2배]" : "";
+        document.getElementById("msg-box").innerText = `⚔️ ${touchCount}회 연타! ${finalDamage} 데미지!${critMsg}`;
 
-        if (bEnemyHp <= 0) {
-          setTimeout(() => { alert("🎉 승리했습니다!"); exitBattle(true); }, 600);
+        if (blobHp <= 0) {
+          setTimeout(() => { 
+            alert(`🎉 ${currentEnemy.name} 처치 성공! (+${currentEnemy.exp} EXP)`); 
+            exitBattle(true); 
+          }, 500);
         } else {
-          setTimeout(() => enemyTurn(false), 1200);
+          setTimeout(enemyTurn, 1500);
         }
       }, 150);
     }
 
-    // [수정] 반격 액션 (50% 데미지 감쇄 + 1.5배 되갚기)
-    let isCounterStance = false;
-    function handleCounterAction() {
-      if (isActionCooldown) return;
-      isCounterStance = true;
-      setBattleBtnsDisabled(true);
-      document.getElementById('battle-msg').innerText = `⚡ 반격 태세를 취했습니다! (피해 50% 경감 & 1.5배 되갚기)`;
-      setTimeout(() => enemyTurn(false), 1200);
+    function handleCounter(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (isCooltime) return;
+      stance = 'counter';
+      document.getElementById("msg-box").innerText = "⚡ 반격 태세를 취했습니다!";
+      disableButtons(true);
+      setTimeout(enemyTurn, 1500);
     }
 
-    // 회피 액션 (5초 제한 + 회피 스탯)
-    function handleDodgeAction() {
-      if (isActionCooldown || dodgeDisabledTurn) return;
-      isDodging = true;
-      touchCount = 0;
-      updateTouchBox();
-      setBattleBtnsDisabled(true);
-
-      let left = 5;
-      document.getElementById('battle-msg').innerText = `💨 5초간 키보드/마우스를 연타하여 회피율을 올리세요!`;
-
-      battleTimer = setInterval(() => {
-        left--;
-        if (left <= 0) {
-          clearInterval(battleTimer);
-          finishDodgeAction();
-        }
-      }, 1000);
+    function handleDodge(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!isDodgeMode && !isCooltime && !dodgeDisabledTurn) {
+        isDodgeMode = true;
+        touchCount = 0;
+        updateTouchBox();
+        disableButtons(true);
+        
+        let timeLeft = 5;
+        document.getElementById("msg-box").innerText = `💨 5초간 연타하여 회피 확률을 올리세요!`;
+        
+        timer = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            finishDodgeSetup();
+          }
+        }, 1000);
+      }
     }
 
-    function finishDodgeAction() {
-      isDodging = false;
-      const dodgeStatBonus = playerData.stats.dodge * 3;
-      let dodgeRate = Math.min(95, (touchCount * 1.5) + dodgeStatBonus);
+    function finishDodgeSetup() {
+      isDodgeMode = false;
+      let dodgeRate = (Math.floor(touchCount / 10) * 5);
       let isDodged = Math.random() < (dodgeRate / 100);
 
-      document.getElementById('battle-msg').innerText = `💨 회피 준비 완료! (성공률: ${dodgeRate.toFixed(0)}%)`;
-      setTimeout(() => enemyTurn(isDodged), 1200);
+      document.getElementById("msg-box").innerText = `💨 회피 준비 완료! (성공률: ${dodgeRate}%)`;
+      setTimeout(() => { enemyTurn(isDodged); }, 1500);
     }
 
-    // 적 턴 로직 및 [수정] 반격 처리
-    function enemyTurn(isDodged) {
-      let enemyDmg = currentEnemy.baseLv * 8 + Math.floor(Math.random() * 10);
+    function enemyTurn(isDodged = false) {
+      let minD = currentEnemy ? currentEnemy.minDmg : 5;
+      let maxD = currentEnemy ? currentEnemy.maxDmg : 15;
+      let rawDamage = Math.floor(Math.random() * (maxD - minD + 1)) + minD; 
+      let finalDamage = rawDamage;
 
       if (isDodged) {
-        dodgeDisabledTurn = true; // 다음 턴 회피 불가
-        document.getElementById('battle-msg').innerText = `💨 PERFECT! 적의 공격을 완벽히 회피했습니다!`;
-        startTurnCooldown();
+        dodgeDisabledTurn = true;
+        document.getElementById("msg-box").innerText = `💨 회피 성공! 적의 턴이 스킵되었습니다!`;
+        stance = 'none';
+        startCooltime();
         return;
       }
 
       dodgeDisabledTurn = false;
+      finalDamage = parseFloat(finalDamage.toFixed(1));
+      heroHp = Math.max(0, heroHp - finalDamage).toFixed(1);
 
-      // [수정] 반격: 피해량 50% 경감 입기 + 받은 공격력의 1.5배 적에게 되갚기
-      if (isCounterStance) {
-        isCounterStance = false;
+      triggerShake();
+      showFloatingText(finalDamage, 'hero');
+      updateHpUI();
+
+      if (stance === 'counter') {
+        let counterDamage = parseFloat((finalDamage * 2).toFixed(1));
+        blobHp = Math.max(0, blobHp - counterDamage).toFixed(1);
+
+        document.getElementById("msg-box").innerText = `⚡ ${finalDamage} 피해를 입고 ${counterDamage} 데미지로 반격했습니다!`;
         
-        let reducedHeroDmg = parseFloat((enemyDmg * 0.5).toFixed(1)); // 50% 감쇄된 데미지
-        let counterDmg = parseFloat((enemyDmg * 1.5).toFixed(1));      // 1.5배 반격 데미지
+        setTimeout(() => {
+          triggerSlashEffect();
+          triggerShake();
+          showFloatingText(counterDamage, 'blob', true);
+          updateHpUI();
+        }, 800);
 
-        bHeroHp = Math.max(0, bHeroHp - reducedHeroDmg);
-        bEnemyHp = Math.max(0, bEnemyHp - counterDmg);
-
-        triggerSlashAnimation();
-        triggerShake();
-        showFloatingDamage(reducedHeroDmg, 'hero', false);
-        showFloatingDamage(counterDmg, 'enemy', false, true);
-        updateBattleHp();
-
-        document.getElementById('battle-msg').innerText = `⚡ 피해량 50% 경감(-${reducedHeroDmg})! 그리고 ${counterDmg} 데미지로 반격 성공!`;
-
-        if (bEnemyHp <= 0) {
-          setTimeout(() => { alert("🎉 반격으로 승리했습니다!"); exitBattle(true); }, 800);
-          return;
-        }
       } else {
-        bHeroHp = Math.max(0, bHeroHp - enemyDmg);
-        triggerShake();
-        showFloatingDamage(enemyDmg, 'hero', false);
-        updateBattleHp();
-        document.getElementById('battle-msg').innerText = `👾 ${currentEnemy.name}의 공격! ${enemyDmg} 피해를 입었습니다.`;
+        document.getElementById("msg-box").innerText = `👾 ${currentEnemy.name}의 공격! ${finalDamage} 데미지를 입었습니다.`;
       }
 
-      if (bHeroHp <= 0) {
-        setTimeout(() => { alert("💀 패배했습니다... 중앙 안전구역에서 부활합니다."); exitBattle(false); }, 600);
+      stance = 'none';
+
+      if (heroHp <= 0) {
+        setTimeout(() => { 
+          alert("💀 패배하셨습니다... 마을로 돌아갑니다."); 
+          exitBattle(false); 
+        }, 500);
+      } else if (blobHp <= 0) {
+        setTimeout(() => { 
+          alert(`🎉 반격으로 ${currentEnemy.name} 처치 성공! (+${currentEnemy.exp} EXP)`); 
+          exitBattle(true); 
+        }, 1200);
       } else {
-        startTurnCooldown();
+        startCooltime();
       }
     }
 
-    function handleRunAction() {
-      if (isActionCooldown) return;
-      alert("🏃 전투에서 후퇴하여 중앙 안전구역으로 이동합니다.");
-      exitBattle(false, true);
-    }
-
-    function startTurnCooldown() {
-      isActionCooldown = true;
-      let time = 2;
-      const cdTimer = setInterval(() => {
-        time--;
-        if (time <= 0) {
-          clearInterval(cdTimer);
-          isActionCooldown = false;
-          setBattleBtnsDisabled(false);
-          document.getElementById('battle-msg').innerText = `당신의 턴입니다! 행동을 선택하세요.`;
-        } else {
-          document.getElementById('battle-msg').innerText = `⏳ 턴 대기 중... (${time}초)`;
-        }
+    function startCooltime() {
+      isCooltime = true;
+      let coolTime = 3;
+      setTimeout(() => {
+        let coolTimer = setInterval(() => {
+          coolTime--;
+          if (coolTime > 0) {
+            document.getElementById("msg-box").innerText = `⏳ 턴 대기 시간... ${coolTime}초 남음`;
+          } else {
+            clearInterval(coolTimer);
+            isCooltime = false;
+            document.getElementById("msg-box").innerText = dodgeDisabledTurn ? "당신의 턴입니다! (지난턴 회피로 💨 회피 쿨다운)" : "당신의 턴입니다! [1]~[4] 키를 누르세요.";
+            disableButtons(false);
+          }
+        }, 1000);
       }, 1000);
     }
 
-    /* ===================================================
-       연출 효과 헬퍼 함수
-    =================================================== */
-    function updateBattleHp() {
-      document.getElementById('b-hero-hp').innerText = bHeroHp.toFixed(0);
-      document.getElementById('b-hero-max-hp').innerText = bHeroMaxHp;
-      document.getElementById('b-enemy-hp').innerText = bEnemyHp.toFixed(0);
-      document.getElementById('b-enemy-max-hp').innerText = bEnemyMaxHp;
-
-      document.getElementById('hero-hp-fill').style.width = `${(bHeroHp / bHeroMaxHp) * 100}%`;
-      document.getElementById('enemy-hp-fill').style.width = `${(bEnemyHp / bEnemyMaxHp) * 100}%`;
-    }
-
-    function setBattleBtnsDisabled(disabled) {
-      document.getElementById('btn-atk').disabled = disabled;
-      document.getElementById('btn-counter').disabled = disabled;
-      document.getElementById('btn-dodge').disabled = disabled || dodgeDisabledTurn;
-      document.getElementById('btn-run').disabled = disabled;
-    }
-
-    function triggerSlashAnimation() {
-      const slash = document.getElementById('slash-effect');
-      slash.style.display = 'block';
-      slash.classList.add('slash-active');
+    function triggerSlashEffect() {
+      const slash = document.getElementById("slash-effect");
+      slash.style.display = "block";
+      slash.classList.add("slash-active");
       setTimeout(() => {
-        slash.classList.remove('slash-active');
-        slash.style.display = 'none';
+        slash.classList.remove("slash-active");
+        slash.style.display = "none";
       }, 300);
     }
 
     function triggerShake() {
-      const board = document.getElementById('battle-board');
-      board.classList.add('shake');
-      setTimeout(() => board.classList.remove('shake'), 350);
+      const board = document.getElementById("game-board");
+      board.classList.add("shake");
+      setTimeout(() => { board.classList.remove("shake"); }, 350);
     }
 
     function triggerCritGlow() {
-      const board = document.getElementById('battle-board');
-      board.classList.add('crit-glow');
-      setTimeout(() => board.classList.remove('crit-glow'), 500);
+      const board = document.getElementById("game-board");
+      board.classList.add("crit-glow");
+      setTimeout(() => { board.classList.remove("crit-glow"); }, 600);
     }
 
-    function showFloatingDamage(dmg, target, isCrit, isCounter = false) {
-      const board = document.getElementById('battle-board');
-      const el = document.createElement('div');
-      el.className = `floating-dmg ${isCrit ? 'crit' : ''} ${isCounter ? 'counter' : ''}`;
-      el.innerText = `${isCrit ? '💥 ' : ''}${isCounter ? '⚡ ' : ''}-${dmg}`;
-
-      if (target === 'enemy') {
-        el.style.right = '15%';
-        el.style.top = '100px';
+    function showFloatingText(damage, target, isCrit = false) {
+      const board = document.getElementById("game-board");
+      const text = document.createElement("div");
+      text.className = `floating-damage ${isCrit ? 'crit' : ''}`;
+      text.innerText = isCrit ? `💥-${damage}` : `-${damage}`;
+      
+      if (target === 'blob') {
+        text.style.right = "10%";
+        text.style.top = "100px";
       } else {
-        el.style.left = '15%';
-        el.style.top = '100px';
-        el.style.color = '#ff9900';
+        text.style.left = "10%";
+        text.style.top = "100px";
+        text.style.color = "#ff9900";
       }
 
-      board.appendChild(el);
-      setTimeout(() => el.remove(), 800);
+      board.appendChild(text);
+      setTimeout(() => { text.remove(); }, 800);
+    }
+
+    function updateHpUI() {
+      document.getElementById("hero-hp").innerText = heroHp;
+      document.getElementById("blob-hp").innerText = blobHp;
+      document.getElementById("hero-hp-fill").style.width = `${(heroHp / playerMaxHp) * 100}%`;
+      document.getElementById("blob-hp-fill").style.width = `${(blobHp / blobMaxHp) * 100}%`;
+    }
+
+    function disableButtons(status) {
+      document.getElementById("btn-attack").disabled = status;
+      document.getElementById("btn-counter").disabled = status;
+      document.getElementById("btn-dodge").disabled = status || dodgeDisabledTurn;
+      document.getElementById("btn-run").disabled = status;
     }
   </script>
 </body>
