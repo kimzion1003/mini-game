@@ -178,6 +178,28 @@
       100% { transform: scale(1.05); opacity: 1; }
     }
 
+    /* 맵 중앙 스폰 구역 UI */
+    #spawn-zone {
+      position: absolute;
+      left: 800px;
+      top: 500px;
+      width: 160px;
+      height: 160px;
+      transform: translate(-50%, -50%);
+      border: 3px dashed #00ff88;
+      border-radius: 50%;
+      background: rgba(0, 255, 136, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00ff88;
+      font-weight: bold;
+      font-size: 13px;
+      text-shadow: 0 0 6px #000;
+      pointer-events: none;
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+    }
+
     /* 필드 적 심볼 */
     .enemy-symbol {
       position: absolute;
@@ -214,7 +236,20 @@
       border: 3px solid #fff;
       border-radius: 50%;
       box-shadow: 0 0 15px #00ff88;
+      transition: background-color 0.2s, box-shadow 0.2s;
     }
+    /* 스폰 무적 상태 표현 */
+    #player-symbol.invincible #player-body {
+      background: #00e1ff;
+      border-color: #fff;
+      box-shadow: 0 0 25px #00e1ff, 0 0 10px #fff;
+      animation: shield-blink 0.3s infinite alternate;
+    }
+    @keyframes shield-blink {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
     #player-tag {
       position: absolute;
       top: -24px;
@@ -301,7 +336,7 @@
     /* 3. 스탯 / 스킬 / 변이 / 정보 UI (상단 팝업 모달) */
     #popup-modal {
       position: absolute;
-      top: -450px; /* 슬라이드 애니메이션 */
+      top: -450px;
       left: 50%;
       transform: translateX(-50%);
       width: 580px;
@@ -465,7 +500,7 @@
       top: 125px;
       left: 50%;
       transform: translateX(-50%);
-      width: 130px;
+      width: 140px;
       height: 90px;
       background: rgba(10, 10, 10, 0.85);
       border: 3px solid #555;
@@ -477,7 +512,7 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.8);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    #touch-box .t-title { font-size: 11px; color: #888; }
+    #touch-box .t-title { font-size: 10px; color: #888; letter-spacing: 0.5px; }
     #touch-box .t-count { font-size: 32px; font-weight: bold; color: #fff; }
     
     /* 연타 단계 색상 (노랑 ➔ 주황 ➔ 빨강 ➔ 하양) */
@@ -524,6 +559,7 @@
       z-index: 20;
     }
     .floating-dmg.crit { color: #ffea00 !important; font-size: 40px !important; }
+    .floating-dmg.counter { color: #00e1ff !important; font-size: 36px !important; }
     @keyframes float-up {
       0% { opacity: 0; transform: translateY(0) scale(0.5); }
       30% { opacity: 1; transform: translateY(-20px) scale(1.2); }
@@ -582,6 +618,9 @@
         <!-- 포탈 -->
         <div id="portal-prev" class="portal portal-prev">◀ 이전 맵</div>
         <div id="portal-next" class="portal portal-next">다음 맵 ▶</div>
+
+        <!-- 맵 중앙 스폰 구역 -->
+        <div id="spawn-zone">🛡️ 중앙 안전지대</div>
 
         <!-- 필드 적 심볼 (4마리) -->
         <div id="enemy-0" class="enemy-symbol"><span class="icon">👾</span><span class="e-name">적1</span></div>
@@ -715,7 +754,7 @@
         <div id="battle-hero" class="battle-char">⚔️</div>
 
         <div id="touch-box">
-          <div class="t-title">TAP COUNT</div>
+          <div class="t-title">KEY / TAP COUNT</div>
           <div id="touch-count" class="t-count">0</div>
         </div>
 
@@ -755,6 +794,9 @@
       x: 800,
       y: 500
     };
+
+    let isInvincible = false;
+    let invincibleTimer = null;
 
     function autoSave() {
       if (!currentUser) return;
@@ -822,7 +864,7 @@
     }
 
     /* ===================================================
-       2. 맵 및 카메라 뷰포트 시스템
+       2. 맵 및 카메라 뷰포트 시스템 & 스폰 시스템
     =================================================== */
     const MAPS = [
       { name: "1단계: 쉬움", reqLv: 1, enemyBaseLv: 1, color: "#181c24" },
@@ -847,12 +889,12 @@
       document.getElementById('portal-prev').style.display = mapIdx === 0 ? 'none' : 'flex';
       document.getElementById('portal-next').style.display = mapIdx === MAPS.length - 1 ? 'none' : 'flex';
 
-      // 적 심볼 위치 배치
+      // 적 심볼 위치 배치 (스폰 구역인 800, 500 주변을 피해서 배치)
       enemySymbols = [
-        { id: 0, x: 400, y: 300, name: `적 (Lv.${map.enemyBaseLv})`, baseLv: map.enemyBaseLv, alive: true },
-        { id: 1, x: 1200, y: 300, name: `적 (Lv.${map.enemyBaseLv + 2})`, baseLv: map.enemyBaseLv + 2, alive: true },
-        { id: 2, x: 400, y: 700, name: `적 (Lv.${map.enemyBaseLv + 4})`, baseLv: map.enemyBaseLv + 4, alive: true },
-        { id: 3, x: 1200, y: 700, name: `적 (Lv.${map.enemyBaseLv + 6})`, baseLv: map.enemyBaseLv + 6, alive: true }
+        { id: 0, x: 350, y: 250, name: `적 (Lv.${map.enemyBaseLv})`, baseLv: map.enemyBaseLv, alive: true },
+        { id: 1, x: 1250, y: 250, name: `적 (Lv.${map.enemyBaseLv + 2})`, baseLv: map.enemyBaseLv + 2, alive: true },
+        { id: 2, x: 350, y: 750, name: `적 (Lv.${map.enemyBaseLv + 4})`, baseLv: map.enemyBaseLv + 4, alive: true },
+        { id: 3, x: 1250, y: 750, name: `적 (Lv.${map.enemyBaseLv + 6})`, baseLv: map.enemyBaseLv + 6, alive: true }
       ];
 
       enemySymbols.forEach(e => {
@@ -864,6 +906,25 @@
       });
 
       autoSave();
+    }
+
+    // [수정] 중앙 스폰 지점 이동 및 3초간 무적 보호
+    function respawnAtCenter() {
+      playerData.x = 800; // 맵 중앙 X
+      playerData.y = 500; // 맵 중앙 Y
+      triggerInvincible(3000); // 3초 무적
+    }
+
+    function triggerInvincible(durationMs) {
+      isInvincible = true;
+      const pEl = document.getElementById('player-symbol');
+      pEl.classList.add('invincible');
+
+      if (invincibleTimer) clearTimeout(invincibleTimer);
+      invincibleTimer = setTimeout(() => {
+        isInvincible = false;
+        pEl.classList.remove('invincible');
+      }, durationMs);
     }
 
     // 이동 처리 및 카메라 추적
@@ -880,7 +941,7 @@
       const pEl = document.getElementById('player-symbol');
       pEl.style.left = `${playerData.x}px`;
       pEl.style.top = `${playerData.y}px`;
-      document.getElementById('player-tag').innerText = `${currentUser} (Lv.${playerData.level})`;
+      document.getElementById('player-tag').innerText = `${currentUser} (Lv.${playerData.level})${isInvincible ? ' [무적]' : ''}`;
 
       // 카메라 추적 (카메라 뷰포트 850x620)
       const camX = Math.max(0, Math.min(1600 - 850, playerData.x - 425));
@@ -911,6 +972,8 @@
     }
 
     function checkEnemyCollision() {
+      if (isInvincible) return; // 무적 상태 시 적 충돌 무시
+
       enemySymbols.forEach(e => {
         if (e.alive) {
           const dist = Math.hypot(playerData.x - e.x, playerData.y - e.y);
@@ -921,14 +984,24 @@
       });
     }
 
-    // 키보드 & 키패드 이벤트
+    /* [수정] 키보드 / 화면 연타 통합 처리 시스템 */
     window.addEventListener('keydown', e => {
       const k = e.key.toLowerCase();
+
+      // 전투 중 공격/회피 타이밍일 때: 모든 키보드 입력을 연타로 인정!
+      if (!isFieldMode && (isAttacking || isDodging)) {
+        touchCount++;
+        updateTouchBox();
+        return;
+      }
+
+      // 필드 이동 키 처리
       if (k === 'w' || k === 'ㅈ') keys.w = true;
       if (k === 'a' || k === 'ㅁ') keys.a = true;
       if (k === 's' || k === 'ㄴ') keys.s = true;
       if (k === 'd' || k === 'ㅇ') keys.d = true;
     });
+
     window.addEventListener('keyup', e => {
       const k = e.key.toLowerCase();
       if (k === 'w' || k === 'ㅈ') keys.w = false;
@@ -1050,7 +1123,8 @@
       setBattleBtnsDisabled(false);
     }
 
-    function exitBattle(isVictory) {
+    // [수정] 후퇴 및 패배 시 중앙 스폰 이동 처리
+    function exitBattle(isVictory, isRun = false) {
       clearInterval(battleTimer);
       isAttacking = false;
       isDodging = false;
@@ -1063,13 +1137,16 @@
         document.getElementById(`enemy-${currentEnemy.id}`).style.display = 'none';
         currentEnemy.alive = false;
         gainExp(currentEnemy.baseLv * 35);
+      } else if (!isVictory || isRun) {
+        // [수정] 패배 및 후퇴 시 맵 중앙 스폰 지점 이동 및 3초 무적 보호
+        respawnAtCenter();
       }
 
       isFieldMode = true;
       requestAnimationFrame(gameLoop);
     }
 
-    // 탭/클릭 연타 등록 및 화면 글로우/박스 테두리
+    // 마우스/터치 클릭 연타 처리
     window.addEventListener('pointerdown', () => {
       if (document.getElementById('battle-screen').style.display === 'flex') {
         if (isAttacking || isDodging) {
@@ -1090,7 +1167,7 @@
       else if (touchCount >= 20) box.classList.add('tier-yellow');
     }
 
-    // 공격 액션 (5초 제한)
+    // 공격 액션 (5초 제한, 모든 키/터치 연타)
     function handleAttackAction() {
       if (isActionCooldown) return;
       isAttacking = true;
@@ -1099,7 +1176,7 @@
       setBattleBtnsDisabled(true);
 
       let left = 5;
-      document.getElementById('battle-msg').innerText = `🔥 5초간 화면을 미친듯이 연타하세요!`;
+      document.getElementById('battle-msg').innerText = `🔥 5초간 키보드 아무 키나 마우스를 미친듯이 연타하세요!`;
 
       battleTimer = setInterval(() => {
         left--;
@@ -1139,13 +1216,13 @@
       }, 150);
     }
 
-    // 반격 액션 (1.5배 반사)
+    // [수정] 반격 액션 (50% 데미지 감쇄 + 1.5배 되갚기)
     let isCounterStance = false;
     function handleCounterAction() {
       if (isActionCooldown) return;
       isCounterStance = true;
       setBattleBtnsDisabled(true);
-      document.getElementById('battle-msg').innerText = `⚡ 반격 태세를 취했습니다! (적 공격 1.5배 반사)`;
+      document.getElementById('battle-msg').innerText = `⚡ 반격 태세를 취했습니다! (피해 50% 경감 & 1.5배 되갚기)`;
       setTimeout(() => enemyTurn(false), 1200);
     }
 
@@ -1158,7 +1235,7 @@
       setBattleBtnsDisabled(true);
 
       let left = 5;
-      document.getElementById('battle-msg').innerText = `💨 5초간 연타하여 회피율을 올리세요!`;
+      document.getElementById('battle-msg').innerText = `💨 5초간 키보드/마우스를 연타하여 회피율을 올리세요!`;
 
       battleTimer = setInterval(() => {
         left--;
@@ -1179,7 +1256,7 @@
       setTimeout(() => enemyTurn(isDodged), 1200);
     }
 
-    // 적 턴 로직
+    // 적 턴 로직 및 [수정] 반격 처리
     function enemyTurn(isDodged) {
       let enemyDmg = currentEnemy.baseLv * 8 + Math.floor(Math.random() * 10);
 
@@ -1192,16 +1269,23 @@
 
       dodgeDisabledTurn = false;
 
+      // [수정] 반격: 피해량 50% 경감 입기 + 받은 공격력의 1.5배 적에게 되갚기
       if (isCounterStance) {
         isCounterStance = false;
-        let counterDmg = parseFloat((enemyDmg * 1.5).toFixed(1));
+        
+        let reducedHeroDmg = parseFloat((enemyDmg * 0.5).toFixed(1)); // 50% 감쇄된 데미지
+        let counterDmg = parseFloat((enemyDmg * 1.5).toFixed(1));      // 1.5배 반격 데미지
+
+        bHeroHp = Math.max(0, bHeroHp - reducedHeroDmg);
         bEnemyHp = Math.max(0, bEnemyHp - counterDmg);
 
-        document.getElementById('battle-msg').innerText = `⚡ 적의 공격을 가드하고 ${counterDmg} 데미지로 반격했습니다!`;
         triggerSlashAnimation();
         triggerShake();
-        showFloatingDamage(counterDmg, 'enemy', true);
+        showFloatingDamage(reducedHeroDmg, 'hero', false);
+        showFloatingDamage(counterDmg, 'enemy', false, true);
         updateBattleHp();
+
+        document.getElementById('battle-msg').innerText = `⚡ 피해량 50% 경감(-${reducedHeroDmg})! 그리고 ${counterDmg} 데미지로 반격 성공!`;
 
         if (bEnemyHp <= 0) {
           setTimeout(() => { alert("🎉 반격으로 승리했습니다!"); exitBattle(true); }, 800);
@@ -1216,7 +1300,7 @@
       }
 
       if (bHeroHp <= 0) {
-        setTimeout(() => { alert("💀 패배했습니다..."); exitBattle(false); }, 600);
+        setTimeout(() => { alert("💀 패배했습니다... 중앙 안전구역에서 부활합니다."); exitBattle(false); }, 600);
       } else {
         startTurnCooldown();
       }
@@ -1224,8 +1308,8 @@
 
     function handleRunAction() {
       if (isActionCooldown) return;
-      alert("🏃 전투에서 도망쳤습니다.");
-      exitBattle(false);
+      alert("🏃 전투에서 후퇴하여 중앙 안전구역으로 이동합니다.");
+      exitBattle(false, true);
     }
 
     function startTurnCooldown() {
@@ -1286,11 +1370,11 @@
       setTimeout(() => board.classList.remove('crit-glow'), 500);
     }
 
-    function showFloatingDamage(dmg, target, isCrit) {
+    function showFloatingDamage(dmg, target, isCrit, isCounter = false) {
       const board = document.getElementById('battle-board');
       const el = document.createElement('div');
-      el.className = `floating-dmg ${isCrit ? 'crit' : ''}`;
-      el.innerText = `${isCrit ? '💥 ' : ''}-${dmg}`;
+      el.className = `floating-dmg ${isCrit ? 'crit' : ''} ${isCounter ? 'counter' : ''}`;
+      el.innerText = `${isCrit ? '💥 ' : ''}${isCounter ? '⚡ ' : ''}-${dmg}`;
 
       if (target === 'enemy') {
         el.style.right = '15%';
